@@ -1,6 +1,6 @@
 COMP 4300
 =====================
-Cameron Mathis
+Computer Architecture
 
 Overview:
 -------------
