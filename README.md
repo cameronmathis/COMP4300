@@ -5,9 +5,7 @@ Cameron Mathis
 Overview:
 -------------
 
-This is the repository for our class projects. Feel free to poke around and shoot us an email if you wish!
-
-War Eagle.
+This is the repository for my COMP 4300 projects.
 
 Project 1
 -------------
@@ -72,7 +70,3 @@ Currently the default program is a dual-tone multifrequency (DTMF) calculator. I
 **"The best way to accelerate an IBM is at 9.8 m/s/s."**
 
 **"recursion (re - cur' - zhun) n. 1. (see recursion)"**
-
-
-WAR EAGLE
-----------
