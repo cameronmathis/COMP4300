@@ -9,8 +9,8 @@
 
 case $1 in
 	compile)
-		g++ stackSim.cpp -o stackSimulator.o
-		g++ -c stackMem.cpp -o stackMemory.o
+		g++ stackSim.cpp -std=c++11 -o stackSimulator.o
+		g++ -c stackMem.cpp -std=c++11 -o stackMemory.o
 		;;
 	run)
 		./stackSimulator.o

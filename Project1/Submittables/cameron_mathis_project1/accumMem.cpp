@@ -22,8 +22,9 @@ using namespace std;
 /*******
 	Data Structures
 ********/
-typedef uint32_t mem_addr;
-typedef uint32_t instruction;
+typedef unsigned int uint32;
+typedef uint32 mem_addr;
+typedef uint32 instruction;
 
 mem_addr text_top = 0x00100000;
 mem_addr data_top = 0x00200000;

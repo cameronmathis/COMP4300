@@ -9,8 +9,8 @@
 
 case $1 in
 	compile)
-		g++ accumSim.cpp -o accumSimulator.o
-		g++ -c accumMem.cpp -o accumMemory.o
+		g++ accumSim.cpp -std=c++11 -o accumSimulator.o
+		g++ -c accumMem.cpp -std=c++11 -o accumMemory.o
 		;;
 	run)
 		./accumSimulator.o
