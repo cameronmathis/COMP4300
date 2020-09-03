@@ -7,7 +7,7 @@ Project 1 <br/>
 Overview: 
 -------------
 
-We have two simulators, one is a stack Machine and one is an Accumulator.
+We have two simulators, one is a stack Machine and one is an Accumulator. <br/>
 They both read in code from their respective "stackCode.txt" and "accumCode.txt" files.
 
 Each simulator has two parts. The memory simulation and the processor/instruction simulation.
