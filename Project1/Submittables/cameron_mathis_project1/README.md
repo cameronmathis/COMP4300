@@ -37,7 +37,7 @@ Stack Machine
 
 Open up the terminal navigate to this project and run:
 	
-	$ make -f makeStackFile
+	$ ./stack.sh compile
 
 You should see this:
 
@@ -46,7 +46,7 @@ You should see this:
 
 Run: 
 
-	$ ./stackSimulator.o
+	$ ./stack.sh run
 
 You should see this: (With original code)
 
@@ -55,7 +55,7 @@ You should see this: (With original code)
 
 Once you are done run:
 	
-	$ make -f makeStackFile clean
+	$ ./stack.sh clean
 
 This will clean up the folder.
 
@@ -67,7 +67,7 @@ Accumulator
 
 Open up the terminal navigate to this project and run:
 	
-	$ make -f makeAccumFile
+	$ ./accum.sh compile
 
 You should see this:
 
@@ -76,7 +76,7 @@ You should see this:
 
 Run:
 
-	$ ./accumSimulator.o
+	$ ./accum.sh run
 
 You should see this: (With original code)
 
@@ -85,7 +85,7 @@ You should see this: (With original code)
 
 Once you are done run:
 
-	$ make -f makeAccumFile clean
+	$ ./accum.sh clean
 
 This will clean up the folder.
 
