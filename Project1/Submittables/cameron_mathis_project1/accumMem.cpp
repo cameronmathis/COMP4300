@@ -241,7 +241,7 @@ void Memory::print_memory()										// To give a visual of the memory space
 		memory_index++;
 	}
 	cout <<	"==========================" << endl;
-/ Data 
+// Data 
 	memory_index = 0;
 	cout <<	"==== DATA ======================" << endl;
 	while (memory_index < DATA_LENGTH)
