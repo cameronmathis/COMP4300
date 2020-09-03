@@ -90,7 +90,7 @@ If you take a look in these, they will have two main sections; ".text" and ".dat
 
 >".text"
 
-This is where the binary for the code is. Humans read it as Push x, the computer reads it as "0x01200000". Weird huh?
+This is where the binary for the code is.
 
 >".data"
 
