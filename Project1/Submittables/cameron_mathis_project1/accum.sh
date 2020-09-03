@@ -19,6 +19,6 @@ case $1 in
 		rm accumSimulator.o accumMemory.o
 		;;
 	*)
-		echo command not entered
+		echo command invalid or missing
 		;;
 esac
