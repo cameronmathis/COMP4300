@@ -1,16 +1,16 @@
 COMP 4300
 =====================
-Cameron Mathis
-Project 1
+Cameron Mathis <br/>
+Project 1 <br/>
 09/11/20
 
 Overview: 
 -------------
 
-We have two simulators, one is a stack Machine and one is an Accumulator.
-They both read in code from their respective "..type..Code.txt" files. (look in the notes section for more) 
+We have two simulators, one is a stack Machine and one is an Accumulator. <br/>
+They both read in code from their respective "stackCode.txt" and "accumCode.txt" files.
 
-Each simulator has two parts. Memory simulation and the processor / instruction simulation.
+Each simulator has two parts. The memory simulation and the processor/instruction simulation.
 
 We are trying to evaluate this equation: 
 
@@ -22,22 +22,16 @@ We are trying to evaluate this equation:
 >
 > Answer: 82
 
-To run each machine, look below!
-
-Happy simulating
-
-War Eagle.
+To run each machine, look below.
 
 
 
 Stack Machine
 -------------
 
-#### Compile Stack Machine ####
-
-Open up the terminal navigate to this project and run:
+In order to compile the stack machine, open up the terminal navigate to this project and run:
 	
-	$ make -f makeStackFile
+	$ ./stack.sh compile
 
 You should see this:
 
@@ -46,28 +40,26 @@ You should see this:
 
 Run: 
 
-	$ ./stackSimulator.o
+	$ ./stack.sh run
 
-You should see this: (With original code)
+You should see this:
 
 >82 was popped from the top of the sack. <br/>
 >Goodbye: Program is ending.
 
 Once you are done run:
 	
-	$ make -f makeStackFile clean
+	$ ./stack.sh clean
 
-This will clean up the folder.
+This will clean up the folder by removing the stackSimulator.o and stackMemory.o files.
 
 
 Accumulator
 -------------
 
-#### Compile Accumulator ####
-
-Open up the terminal navigate to this project and run:
+In order to compile the stack machine, open up the terminal navigate to this project and run:
 	
-	$ make -f makeAccumFile
+	$ ./accum.sh compile
 
 You should see this:
 
@@ -76,29 +68,29 @@ You should see this:
 
 Run:
 
-	$ ./accumSimulator.o
+	$ ./accum.sh run
 
-You should see this: (With original code)
+You should see this:
 
 >82 is in the internal register. <br/>
 >Goodbye: Program is ending.
 
 Once you are done run:
 
-	$ make -f makeAccumFile clean
+	$ ./accum.sh clean
 
-This will clean up the folder.
+This will clean up the folder by removing the accumSimulator.o and accumMemory.o files.
 
 Notes
 -------------
 
-#### "..type..Code.txt" Files ####
+#### "stackCode.txt" and "stackCode.txt" Files ####
 
 If you take a look in these, they will have two main sections; ".text" and ".data".
 
 >".text"
 
-This is where the binary for the code is. Humans read it as Push x, the computer reads it as "0x01200000". Weird huh?
+This is where the binary for the code is.
 
 >".data"
 

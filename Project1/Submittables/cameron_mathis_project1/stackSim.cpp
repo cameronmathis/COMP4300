@@ -16,15 +16,15 @@ using namespace std;
 class Sim
 {
 public:
-	Sim();											//Sets internal values, and initilizes Memory
-	void run();										//This is where the fun is
+	Sim();											// Sets internal values, and initilizes Memory
+	void run();										
 private:
-	int instruction_op();							//gives the op code of the internal current_instruction
-	mem_addr instruction_memory_address();			//gives the memory address of the internal current_instruction
-	void load_next_instruction();					//Loads next instruction based on pc
-	mem_addr top_of_stack;							//Points to the current OPEN spot on top of stack
-	mem_addr pc;									//Program counter, keeps up with where program is in memory
-	instruction *current_instruction;				//Pointer to current instruction
+	int instruction_op();							// Gives the op code of the internal current_instruction
+	mem_addr instruction_memory_address();			// Gives the memory address of the internal current_instruction
+	void load_next_instruction();					// Loads next instruction based on pc
+	mem_addr top_of_stack;							// Points to the current OPEN spot on top of stack
+	mem_addr pc;									// Program counter, keeps up with where program is in memory
+	instruction *current_instruction;				// Pointer to current instruction
 	Memory *mem;
 };
 
@@ -43,8 +43,8 @@ Sim::Sim()
 }
 
 void Sim::run()
-{													//Simulates Stack Included functions are:
-	bool more_instructions = true;					//Push, Pop, Add, Mult, end
+{													// Simulates Stack Included functions are:
+	bool more_instructions = true;					// Push, Pop, Add, Mult, End
 	while(more_instructions)
 	{
 		load_next_instruction();
@@ -58,14 +58,14 @@ void Sim::run()
 				top_of_stack++;
 				break;
 			}
-			case 2:	//POP, top_of_stack points to NEXT empty space, so have to decrement it to find current value
+			case 2:	// POP, top_of_stack points to NEXT empty space, so have to decrement it to find current value
 			{
 				top_of_stack--;
 				mem_addr *data = mem->read(top_of_stack);
 				cout << std::dec << *data << " was popped from the top of the sack." <<endl;
 				break;
 			}
-			case 3: //ADD top_of_stack points to NEXT empty space, so have to decrement it to find current value
+			case 3: // ADD, top_of_stack points to NEXT empty space, so have to decrement it to find current value
 			{
 				top_of_stack--;
 				mem_addr *first_data = mem->read(top_of_stack);
@@ -76,7 +76,7 @@ void Sim::run()
 				top_of_stack++;
 				break;
 			}
-			case 4:	//MULT top_of_stack points to NEXT empty space, so have to decrement it to find current value
+			case 4:	// MULT, top_of_stack points to NEXT empty space, so have to decrement it to find current value
 			{
 				top_of_stack--;
 				mem_addr *first_data = mem->read(top_of_stack);
@@ -87,7 +87,7 @@ void Sim::run()
 				top_of_stack++;
 				break;
 			}
-			case 5:	//END
+			case 5:	// END
 			{
 				more_instructions = false;
 				cout << "Goodbye: Program is ending." << endl;
@@ -101,7 +101,7 @@ void Sim::run()
 }
 
 int Sim::instruction_op()
-{															// removes the memory address from the back
+{															// Removes the memory address from the back
 	instruction op_value;
 	op_value = *current_instruction;
 	op_value = op_value >> 24;
@@ -109,7 +109,7 @@ int Sim::instruction_op()
 }
 
 mem_addr Sim::instruction_memory_address()
-{															//removes the bin and op code from the front
+{															// Removes the bin and op code from the front
 	instruction memory_address;
 	memory_address = *current_instruction;
 	memory_address = memory_address << 8;
@@ -118,7 +118,7 @@ mem_addr Sim::instruction_memory_address()
 }
 
 void Sim::load_next_instruction()
-{															//Loads next instruction and increments pc				
+{															// Loads next instruction and increments pc				
 	current_instruction = mem->read(pc);
 	pc++;
 }
