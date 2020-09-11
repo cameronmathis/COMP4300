@@ -3,20 +3,20 @@
 # COMP 4300
 # Cameron Mathis
 # Project 1
-# 9/11/20
+# 9/18/20
 # Stack Machine
 #----------------
 
 case $1 in
 	compile)
-		g++ stackSim.cpp -std=c++11 -o stackSimulator.o
-		g++ -c stackMem.cpp -std=c++11 -o stackMemory.o
+		g++ stackSim.cpp -std=c++11 -o stackSimulator.out
+		g++ -c stackMem.cpp -std=c++11 -o stackMemory.out
 		;;
 	run)
-		./stackSimulator.o
+		./stackSimulator.out
 		;;
 	clean)
-		rm stackSimulator.o stackMemory.o
+		rm stackSimulator.out stackMemory.out
 		;;
 	*)
 		echo command invalid or missing

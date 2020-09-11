@@ -2,7 +2,7 @@
 	COMP 4300
 	Cameron Mathis
 	Project 1
-	09/11/20
+	09/18/20
 	Stack Machine Simulation
 ********/
 
@@ -90,7 +90,6 @@ void Sim::run()
 			case 5:	// END
 			{
 				more_instructions = false;
-				cout << "Goodbye: Program is ending." << endl;
 				break;
 			}
 			default:

@@ -2,17 +2,17 @@ COMP 4300
 =====================
 Cameron Mathis <br/>
 Project 1 <br/>
-09/11/20
+09/18/20
 
 Overview: 
 -------------
 
-We have two simulators, one is a stack Machine and one is an Accumulator. <br/>
+There are two simulators, one is a stack Machine and one is an Accumulator. <br/>
 They both read in code from their respective "stackCode.txt" and "accumCode.txt" files.
 
 Each simulator has two parts. The memory simulation and the processor/instruction simulation.
 
-We are trying to evaluate this equation: 
+The simulators are trying to evaluate this equation: 
 
 >A*X**2 + B*X + C
 >> - x = 3
@@ -35,8 +35,8 @@ In order to compile the stack machine, open up the terminal navigate to this pro
 
 You should see this:
 
->g++ -c stackMem.cpp -o stackMem.o <br/>
->g++ stackSim.cpp -o stackSimulator.o
+>g++ -c stackMem.cpp -o stackMem.out <br/>
+>g++ stackSim.cpp -o stackSimulator.out
 
 Run: 
 
@@ -45,13 +45,12 @@ Run:
 You should see this:
 
 >82 was popped from the top of the sack. <br/>
->Goodbye: Program is ending.
 
 Once you are done run:
 	
 	$ ./stack.sh clean
 
-This will clean up the folder by removing the stackSimulator.o and stackMemory.o files.
+This will clean up the folder by removing the stackSimulator.out and stackMemory.out files.
 
 
 Accumulator
@@ -63,8 +62,8 @@ In order to compile the stack machine, open up the terminal navigate to this pro
 
 You should see this:
 
->g++ -c accumMem.cpp -o accumMem.o <br/>
->g++ accumSim.cpp -o accumSimulator.o
+>g++ -c accumMem.cpp -o accumMem.out <br/>
+>g++ accumSim.cpp -o accumSimulator.out
 
 Run:
 
@@ -73,13 +72,12 @@ Run:
 You should see this:
 
 >82 is in the internal register. <br/>
->Goodbye: Program is ending.
 
 Once you are done run:
 
 	$ ./accum.sh clean
 
-This will clean up the folder by removing the accumSimulator.o and accumMemory.o files.
+This will clean up the folder by removing the accumSimulator.out and accumMemory.out files.
 
 Notes
 -------------
@@ -111,4 +109,3 @@ This is where the beginning information is provided for the computation.
 > 2^7 = 128 (Not Enough)<br/>
 > 2^8 = 265 <br/>
 > At first we were concerned this was going to be the largest hurdle to overcome. It ended up being taken care of with a few well placed bit shifts. In total only about 15 lines of code took care of all the operations we needed to decode out encoding. 
-

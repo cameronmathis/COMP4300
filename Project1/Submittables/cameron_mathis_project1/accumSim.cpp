@@ -2,7 +2,7 @@
 	COMP 4300
 	Cameron Mathis
 	Project 1
-	09/11/20
+	09/18/20
 	Accumulator Machine Simulation
 ********/
 
@@ -77,7 +77,6 @@ void Sim::run()
 			{
 				more_instructions = false;
 				cout << std::dec << internal_register << " is in the internal_register." <<endl;
-				cout << "Goodbye: Program is ending." << endl;
 				break;
 			}
 			default:

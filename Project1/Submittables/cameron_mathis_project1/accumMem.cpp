@@ -2,7 +2,7 @@
 	COMP 4300
 	Cameron Mathis
 	Project 1
-	09/11/20
+	09/18/20
 	Accumulator Machine Simulation
 ********/
 
