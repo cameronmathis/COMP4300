@@ -82,7 +82,7 @@ This will clean up the folder by removing the accumSimulator.out and accumMemory
 Notes
 -------------
 
-#### "stackCode.txt" and "stackCode.txt" Files ####
+#### "stackCode.txt" and "accumCode.txt" Files ####
 
 If you take a look in these, they will have two main sections; ".text" and ".data".
 
