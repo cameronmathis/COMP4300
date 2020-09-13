@@ -1,10 +1,10 @@
-/*******
-	COMP 4300
-	Cameron Mathis
-	Project 1
-	09/18/20
-	Accumulator Machine Simulation
-********/
+/*
+COMP 4300
+Cameron Mathis
+Project 1
+09/18/20
+Accumulator Machine Simulation
+*/
 
 #include <cstdlib>
 #include <stdio.h>
@@ -12,16 +12,12 @@
 #include <fstream>
 #include <string>
 
-
-#define TEXT_LENGTH  100
 #define	DATA_LENGTH  50
+#define TEXT_LENGTH  100
 #define STACK_LENGTH  50
 
 using namespace std;
 
-/*******
-	Data Structures
-********/
 typedef unsigned int uint32;
 typedef uint32 mem_addr;
 typedef uint32 instruction;
@@ -30,7 +26,7 @@ mem_addr text_top = 0x00100000;
 mem_addr data_top = 0x00200000;
 mem_addr stack_top = 0x00300000;
 
-// Kernal data starts at mem_addr 0, ommited because I don't use it in this simulation
+// Kernal data starts at mem_addr 0, ommited because it isn't used in this simulation
 instruction text_segment[TEXT_LENGTH];
 mem_addr data_segment[DATA_LENGTH];
 mem_addr stack_segment[STACK_LENGTH];
@@ -40,31 +36,26 @@ class Memory
 {
 public:
 	Memory();
-	bool load_code(mem_addr memory_address_in);						// Loads from .text section
-	bool load_data(mem_addr memory_address_in, mem_addr data);		// Loads from .data section
-    bool write(mem_addr memory_address_in, mem_addr data);			// Writes to stack section
-    mem_addr * read(mem_addr memory_address_in);					// Reads based on given memory address
-    void print_memory();											// Prints out current memory state
+	bool load_code(mem_addr memory_address_in);						
+	bool load_data(mem_addr memory_address_in, mem_addr data);		
+    bool write(mem_addr memory_address_in, mem_addr data);			
+    mem_addr * read(mem_addr memory_address_in);					
 private:
-	int decode_address_bin(mem_addr memory_address_in);				// Helps decode address into bin
-	int decode_address_index(mem_addr memory_address_in);			// Helps decode address into array index
-	int text_next_open_memory_location;								// Internal counter for text_segment
+	int decode_address_bin(mem_addr memory_address_in);				
+	int decode_address_index(mem_addr memory_address_in);			
+	// Internal counter for text_segment
+	int text_next_open_memory_location;								
 };
-
-
-/*******
-	Class Definition 
-********/
 
 Memory::Memory()  													// Initialize memory
 {
 	text_next_open_memory_location = -1;
 	int hexidecimal;
+	int hexidecimal1;
 	int hexidecimal2;
-	int hexidecimal3;
 	string line;
-	string line2 = "0000000000";
-	string line3 = "0";
+	string line1 = "0000000000";
+	string line2 = "0";
 	int i = 0;
 	ifstream accum_file_code ("accumCode.txt");
 	if (accum_file_code.is_open())
@@ -73,7 +64,7 @@ Memory::Memory()  													// Initialize memory
 		{
 			if (line == ""){continue;}
 			if (line == ".data"){i = 1; continue;}
-			if (line == ".text"){continue;}	
+			if (line == ".text"){i = 0; continue;}	
 			if (i == 0) 												// Text
 			{
 				hexidecimal = std::stoi(line.c_str(),0, 16);
@@ -83,12 +74,12 @@ Memory::Memory()  													// Initialize memory
 			{
 				for (int c = 0; c < 10; c++)
 				{
-					line2[c] = line[c];
-					line3[0] = line[11];
+					line1[c] = line[c];
+					line2[0] = line[11];
 				}
-				hexidecimal2 = std::stoi(line2.c_str(),0, 16);
-				hexidecimal3 = atoi(line3.c_str());
-				load_data(hexidecimal2,hexidecimal3);
+				hexidecimal1 = std::stoi(line1.c_str(),0, 16);
+				hexidecimal2 = atoi(line2.c_str());
+				load_data(hexidecimal1,hexidecimal2);
 			}	
 		}
 	}
@@ -98,41 +89,43 @@ Memory::Memory()  													// Initialize memory
 	accum_file_code.close();
 }
 
-
+// Loads from .text section
 bool Memory::load_code(mem_addr memory_address_in)
 {
-	text_next_open_memory_location++;										
-	if (text_next_open_memory_location < TEXT_LENGTH)						// Checks memory length
-	{
-		text_segment[text_next_open_memory_location] = memory_address_in;	// Stores instruction
+	text_next_open_memory_location++;					
+	// Checks the memory length					
+	if (text_next_open_memory_location < TEXT_LENGTH)						
+	{ // Stores the instruction
+		text_segment[text_next_open_memory_location] = memory_address_in;	
 		return true;
 	}
 	else
-	{		
+	{	// No More memory open
 		cout << "Error: Please expand space for Text Memory." << endl;
-		return false;														// No More memory open
+		return false;														
 	}
 }
 
-
+// Loads from the .data section
 bool Memory::load_data(mem_addr memory_address_in, mem_addr data)
 {
 	mem_addr memory_copy_index = memory_address_in;
 	
 	int memory_index = (int) decode_address_index(memory_copy_index);
-	if (text_next_open_memory_location < DATA_LENGTH)						// Checks memory length
-	{
-		data_segment[memory_index] = data;									// Stores data
+	// Checks the memory length
+	if (text_next_open_memory_location < DATA_LENGTH)						
+	{	// Stores the data
+		data_segment[memory_index] = data;									
 		return true;
 	}
 	else
-	{	
+	{	// No More memory open
 		cout << "Error: Please expand space for Data Memory." << endl;
-		return false;														// No More memory open
+		return false;														
 	}
 }
 
-
+// Writes to stack section. Used by STORE
 bool Memory::write(mem_addr memory_address_in, mem_addr data)
 {
 	mem_addr memory_copy_bin = memory_address_in, memory_copy_index = memory_address_in;
@@ -149,28 +142,29 @@ bool Memory::write(mem_addr memory_address_in, mem_addr data)
 	case 3:
 		{
 			int memory_index = (int) decode_address_index(memory_copy_index);
-			if (text_next_open_memory_location < STACK_LENGTH)						// Checks memory length
-			{
-				stack_segment[memory_index] = data;									// Store data in stack
+			// Checks the memory length
+			if (text_next_open_memory_location < STACK_LENGTH)						
+			{	// Store data in the stack
+				stack_segment[memory_index] = data;									
 				return true;
 			}
 			else
-			{		
+			{	// No more stack open
 				cout << "Error: Please expand space for Stack Memory" << endl;
-				return false;														// No More stack open
+				return false;														
 			}
 		}
 		break;
-	default:
+	default:	// Not in current memory
 			cout << "Error: You cannot write to that memory area." << endl;
-			return false;															// Not in current memory
+			return false;															
 		break;
 	}
 	cout << "Error: Memory write went wrong." << endl;
 	return false;
 }
 
-
+// Reads based on given memory address. Used by LOAD, ADD, and MULT.
 mem_addr * Memory::read(mem_addr memory_address_in )
 {	
 	mem_addr memory_copy_bin = memory_address_in, memory_copy_index = memory_address_in;
@@ -178,8 +172,9 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	{
 	case 1:
 		{
-			int memory_index = (int) decode_address_index(memory_copy_index);									
-			if (memory_index < TEXT_LENGTH)											// Checks text memory length
+			int memory_index = (int) decode_address_index(memory_copy_index);	
+			// Checks the text memory length								
+			if (memory_index < TEXT_LENGTH)											
 			{
 				return &text_segment[memory_index];
 			}
@@ -188,7 +183,8 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	case 2:
 		{
 			int memory_index = (int) decode_address_index(memory_copy_index);
-			if (text_next_open_memory_location < DATA_LENGTH)						// Checks data memory length
+			// Checks the data memory length
+			if (text_next_open_memory_location < DATA_LENGTH)						
 			{
 				return &data_segment[memory_index];									
 			}
@@ -197,23 +193,25 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	case 3:
 		{
 			int memory_index = (int) decode_address_index(memory_copy_index);
-			if (text_next_open_memory_location < STACK_LENGTH)						// Checks stack memory length
+			// Checks the stack memory length
+			if (text_next_open_memory_location < STACK_LENGTH)						
 			{
 				return &stack_segment[memory_index];									
 			}
 		}
 		break;
-	default:
+	default:	// Not in current memory space
 			cout << "Error: Memory read is not within current memory." << endl;
-			return &stack_top;														// Not in current memory space
+			return &stack_top;														
 		break;
 	}
 	cout << "Error: Memory read went wrong." << endl;
 	return &stack_top;
 }
 
+// Helps decode address into bin
 int Memory::decode_address_bin(mem_addr memory_address_in)
-{																// Wipes out everything but the bin bits
+{	// Wipes out everything but the bin bits
 	memory_address_in = memory_address_in << 7;
 	memory_address_in = memory_address_in >> 27;
 	return memory_address_in;
@@ -224,40 +222,10 @@ int Memory::decode_address_bin(mem_addr memory_address_in)
 	// 3--stack
 }
 
+// Helps decode address into array index
 int Memory::decode_address_index(mem_addr memory_address_in)
-{																// Removes the (potential) op code and bin
+{	// Removes the (potential) op code and bin
 	memory_address_in = memory_address_in << 15;
 	memory_address_in = memory_address_in >> 15;
 	return memory_address_in;
-}
-
-void Memory::print_memory()										// To give a visual of the memory space
-{
-// Text
-	int memory_index = 0;
-	cout <<	"==== TEXT ======================" << endl;
-	while (memory_index < TEXT_LENGTH)
-	{
-		cout << "  " << std::hex << text_segment[memory_index] << endl;
-		memory_index++;
-	}
-	cout <<	"==========================" << endl;
-// Data 
-	memory_index = 0;
-	cout <<	"==== DATA ======================" << endl;
-	while (memory_index < DATA_LENGTH)
-	{
-		cout << "  " << data_segment[memory_index] << endl;
-		memory_index++;
-	}
-	cout <<	"==========================" << endl;
-// Stack
-	memory_index = 0;
-	cout <<	"==== STACK ========================================================" << endl;
-	while (memory_index < STACK_LENGTH)
-	{
-		cout << "  " << std::dec << stack_segment[memory_index] << endl;
-		memory_index++;
-	}
-	cout <<	"==========================" << endl;
 }

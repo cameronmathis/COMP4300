@@ -1,10 +1,10 @@
-/*******
-	COMP 4300
-	Cameron Mathis
-	Project 1
-	09/18/20
-	Accumulator Machine Simulation
-********/
+/*
+COMP 4300
+Cameron Mathis
+Project 1
+09/18/20
+Accumulator Machine Simulation
+*/
 
 #include <cstdlib>
 #include <stdio.h>
@@ -16,25 +16,29 @@ using namespace std;
 class Sim
 {
 public:
-	Sim();										// Starts state of simulator and initializes memory
+	Sim();										
 	void run();									
 private:
-	int instruction_op();						// Returns the op code of internal current instruction
-	mem_addr instruction_memory_address();		// Returns the memory address of internal current instruction
-	void load_next_instruction();				// Takes all the steps to load next instruction
-	mem_addr internal_register;					// This is the accumulator its self
-	mem_addr pc;								// Program counter
-	instruction *current_instruction;			// Pointer to the current instruction
-	Memory *mem;								// Memory object
+	int instruction_op();						
+	mem_addr instruction_memory_address();		
+	// This is the accumulator its self
+	mem_addr internal_register;	
+	// Program counter				
+	mem_addr pc;			
+	// Pointer to the current instruction					
+	instruction *current_instruction;	
+	// Memory object		
+	Memory *mem;								
 };
 
 int main()
-{
+{	
 	Sim *sim = new Sim();
 	sim->run();
 	return 0;
 }
 
+// This starts the simulator and initializes the memory
 Sim::Sim()
 {
 	internal_register = 0;
@@ -46,8 +50,9 @@ void Sim::run()
 {
 	bool more_instructions = true;
 	while(more_instructions)
-	{
-		load_next_instruction();
+	{	// Reads next instruction and increments the program counter
+		current_instruction = mem->read(pc);
+		pc++;
 		switch(instruction_op())
 		{
 			case 1:	// LOAD
@@ -86,25 +91,21 @@ void Sim::run()
 	}
 }
 
+// Returns the operation code of the internal current instruction
 int Sim::instruction_op()
-{															// Removes the memory address from instruction
+{	// Removes the memory address from instruction														
 	instruction op_value;					
 	op_value = *current_instruction;
 	op_value = op_value >> 24;
 	return op_value;
 }
 
+// Returns the memory address of the internal current instruction
 mem_addr Sim::instruction_memory_address()
-{															// Removes the op code and resets to correct value
+{	// Removes the operation code and resets to correct value
 	instruction memory_address;
 	memory_address = *current_instruction;
 	memory_address = memory_address << 8;
 	memory_address = memory_address >> 8;
 	return memory_address;
-}
-
-void Sim::load_next_instruction()
-{															// Reads next instruction and increments pc
-	current_instruction = mem->read(pc);
-	pc++;
 }

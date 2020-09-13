@@ -100,7 +100,7 @@ This is where the beginning information is provided for the computation.
 
 ###### Memory Address Length ######
 
-> Dealing with the memory address length and then having an instruction length was a particularly hard/confusing subject. We ended up going with the instruction being 32 bits with an op code having 8 bits on the left hand side. This meant that our memory address is only 24 bits. Unfortunately defining a 40 bit instruction didn't seem feasible.
+> Dealing with the memory address length and then having an instruction length was a particularly hard/confusing subject. I ended up going with the instruction being 32 bits with an operation code having 8 bits on the left hand side. This meant that our memory address is only 24 bits.
 
 
 ###### Instruction Encoding ######
