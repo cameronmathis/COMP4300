@@ -106,19 +106,21 @@ void Sim::run()
 
 // Returns the operation code of the internal current_instruction
 int Sim::instruction_op()
-{	// Removes the memory address from the back
+{	
 	instruction op_value;
-	op_value = *current_instruction;
+	// Shifts all bits to the right 24
 	op_value = op_value >> 24;
 	return op_value;
 }
 
 // Returns the memory address of the internal current_instruction
 mem_addr Sim::instruction_memory_address()
-{	// Removes the bin and op code from the front
+{	
 	instruction memory_address;
 	memory_address = *current_instruction;
+	// Shifts all bits to the left 8
 	memory_address = memory_address << 8;
+	// Shifts all bits to the right 8
 	memory_address = memory_address >> 8;
 	return memory_address;
 }

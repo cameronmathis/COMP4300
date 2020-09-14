@@ -53,6 +53,7 @@ void Sim::run()
 	{	// Reads next instruction and increments the program counter
 		current_instruction = mem->read(pc);
 		pc++;
+		
 		switch(instruction_op())
 		{
 			case 1:	// LOAD
@@ -93,19 +94,22 @@ void Sim::run()
 
 // Returns the operation code of the internal current instruction
 int Sim::instruction_op()
-{	// Removes the memory address from instruction														
+{														
 	instruction op_value;					
 	op_value = *current_instruction;
+	// Shifts all bits to the right 24
 	op_value = op_value >> 24;
 	return op_value;
 }
 
 // Returns the memory address of the internal current instruction
 mem_addr Sim::instruction_memory_address()
-{	// Removes the operation code and resets to correct value
+{
 	instruction memory_address;
 	memory_address = *current_instruction;
+	// Shifts all bits to the left 8
 	memory_address = memory_address << 8;
+	// Shifts all bits to the right 8
 	memory_address = memory_address >> 8;
 	return memory_address;
 }

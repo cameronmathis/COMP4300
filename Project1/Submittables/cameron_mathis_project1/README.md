@@ -84,28 +84,26 @@ Notes
 
 #### "stackCode.txt" and "accumCode.txt" Files ####
 
-If you take a look in these, they will have two main sections; ".text" and ".data".
-
->".text"
-
-This is where the binary for the code is.
+If you take a look in these, they will have two main sections; ".data" and ".text".
 
 >".data"
 
 This is where the beginning information is provided for the computation.
 
+>".text"
 
-#### Thoughts and Issues ####
+This is where the binary for the code is.
+
+
+#### Thoughts ####
 ************************************
+
+###### Op Code Size ######
+
+> With the requirment of supporting 140 operations, I was forced to have an 8 bit operation code. <br/>
+> This was a little frustrating because all the examples in class had a 6 bit operation code. 
 
 ###### Memory Address Length ######
 
-> Dealing with the memory address length and then having an instruction length was a particularly hard/confusing subject. I ended up going with the instruction being 32 bits with an operation code having 8 bits on the left hand side. This meant that our memory address is only 24 bits.
-
-
-###### Instruction Encoding ######
-
-> With the requirment of supporting 140 operations, we were forced to have an 8 bit op code. <br/>
-> 2^7 = 128 (Not Enough)<br/>
-> 2^8 = 265 <br/>
-> At first we were concerned this was going to be the largest hurdle to overcome. It ended up being taken care of with a few well placed bit shifts. In total only about 15 lines of code took care of all the operations we needed to decode out encoding. 
+> I ended up going with the instruction being 32 bits because that is what we covered in class. <br/>
+> Since I was forced to have an 8 bit operation code, I was only left 24 bits for the memory address.

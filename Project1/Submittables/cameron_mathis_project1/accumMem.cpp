@@ -12,8 +12,8 @@ Accumulator Machine Simulation
 #include <fstream>
 #include <string>
 
-#define	DATA_LENGTH  50
 #define TEXT_LENGTH  100
+#define	DATA_LENGTH  50
 #define STACK_LENGTH  50
 
 using namespace std;
@@ -47,7 +47,8 @@ private:
 	int text_next_open_memory_location;								
 };
 
-Memory::Memory()  													// Initialize memory
+// Initialize memory and load from file
+Memory::Memory()  													
 {
 	text_next_open_memory_location = -1;
 	int hexidecimal;
@@ -63,24 +64,28 @@ Memory::Memory()  													// Initialize memory
 		while ( getline (accum_file_code,line))
 		{
 			if (line == ""){continue;}
-			if (line == ".data"){i = 1; continue;}
-			if (line == ".text"){i = 0; continue;}	
-			if (i == 0) 												// Text
-			{
-				hexidecimal = std::stoi(line.c_str(),0, 16);
-				load_code(hexidecimal);
-			}
-			if (i == 1) 												// Data
-			{
+			if (line == ".data"){i = 0; continue;}	
+			if (line == ".text"){i = 1; continue;}
+			// Data
+			if (i == 0) 												
+			{	
 				for (int c = 0; c < 10; c++)
 				{
 					line1[c] = line[c];
 					line2[0] = line[11];
 				}
-				hexidecimal1 = std::stoi(line1.c_str(),0, 16);
+				// Store line1 as hexidecimal
+				hexidecimal1 = std::stoi(line1.c_str(),0,16);
+				// Store line2 as hexidecimal
 				hexidecimal2 = atoi(line2.c_str());
 				load_data(hexidecimal1,hexidecimal2);
 			}	
+			// Text
+			else if (i == 1) 												
+			{	// Store line as hexidecimal
+				hexidecimal = std::stoi(line.c_str(),0,16);
+				load_code(hexidecimal);
+			}
 		}
 	}
 	else{
@@ -125,7 +130,7 @@ bool Memory::load_data(mem_addr memory_address_in, mem_addr data)
 	}
 }
 
-// Writes to stack section. Used by STORE
+// Writes to stack section. Used by STORE.
 bool Memory::write(mem_addr memory_address_in, mem_addr data)
 {
 	mem_addr memory_copy_bin = memory_address_in, memory_copy_index = memory_address_in;
@@ -209,23 +214,21 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	return &stack_top;
 }
 
-// Helps decode address into bin
+// Decodes address into bin
 int Memory::decode_address_bin(mem_addr memory_address_in)
-{	// Wipes out everything but the bin bits
+{	// Shifts all bits to the left 7
 	memory_address_in = memory_address_in << 7;
+	// Shifts all bits to the right 27
 	memory_address_in = memory_address_in >> 27;
 	return memory_address_in;
-	//(-1) -- false
-	// 0--kernal
-	// 1--text
-	// 2--data
-	// 3--stack
+	// 0 = kernal, 1 = text, 2 = data, 3 = stack, and (-1) = error
 }
 
-// Helps decode address into array index
+// Decodes address into array index
 int Memory::decode_address_index(mem_addr memory_address_in)
-{	// Removes the (potential) op code and bin
+{	// Shifts all bits to the left 15
 	memory_address_in = memory_address_in << 15;
+	// Shifts all bits to the right 15 
 	memory_address_in = memory_address_in >> 15;
 	return memory_address_in;
 }

@@ -13,8 +13,8 @@ Stack Machine Memory Simulation
 #include <fstream>
 #include <string>
 
-#define	DATA_LENGTH  50
 #define TEXT_LENGTH  100
+#define	DATA_LENGTH  50
 #define STACK_LENGTH  50
 
 using namespace std;
@@ -23,8 +23,8 @@ typedef unsigned int uint32;
 typedef uint32 mem_addr;
 typedef uint32 instruction;
 
-mem_addr data_top = 0x00100000;
-mem_addr text_top = 0x00200000;
+mem_addr text_top = 0x00100000;
+mem_addr data_top = 0x00200000;
 mem_addr stack_top = 0x00300000;
 
 // Kernal data starts at mem_addr 0, ommited because it isn't used in this simulation
@@ -216,23 +216,21 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	return &stack_top;
 }
 
-// Helps decode address into bin
+// Decodes address into bin
 int Memory::decode_address_bin(mem_addr memory_address_in)
-{	// Removes (potentioal) op code, memory values
+{	// Shifts all bits to the left 7
 	memory_address_in = memory_address_in << 7;
+	/// Shifts all bits to the right 27
 	memory_address_in = memory_address_in >> 27;
 	return memory_address_in;
-	//(-1) -- false
-	// 0--kernal
-	// 1--data
-	// 2--text
-	// 3--stack
+	// 0 = kernal, 1 = text, 2 = data, 3 = stack, and (-1) = error
 }
 
-// Helps decode address into array index
+// Decodes address into array index
 int Memory::decode_address_index(mem_addr memory_address_in)
-{	// Removes op and bin vlaues and resets memory 
+{	// Shifts all bits to the left 15
 	memory_address_in = memory_address_in << 15;	
+	// Shifts all bits to the righ 15
 	memory_address_in = memory_address_in >> 15;
 	return memory_address_in;
 }
