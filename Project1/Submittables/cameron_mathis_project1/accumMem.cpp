@@ -63,11 +63,17 @@ Memory::Memory()
 	{
 		while ( getline (accum_file_code,line))
 		{
-			if (line == ""){continue;}
-			if (line == ".data"){i = 0; continue;}	
-			if (line == ".text"){i = 1; continue;}
+			if (line == ""){continue;}	
+			if (line == ".text"){i = 0; continue;}
+			if (line == ".data"){i = 1; continue;}	
+			// Text
+			else if (i == 0) 												
+			{	// Store line as hexidecimal
+				sscanf(line.data(),"%x", &hexidecimal);
+				load_code(hexidecimal);
+			}
 			// Data
-			if (i == 0) 												
+			if (i == 1) 												
 			{	
 				for (int c = 0; c < 10; c++)
 				{
@@ -75,16 +81,10 @@ Memory::Memory()
 					line2[0] = line[11];
 				}
 				// Store line1 as hexidecimal
-				hexidecimal1 = std::stoi(line1.c_str(),0,16);
+				sscanf(line1.data(), "%x", &hexidecimal1);
 				// Store line2 as hexidecimal
 				hexidecimal2 = atoi(line2.c_str());
 				load_data(hexidecimal1,hexidecimal2);
-			}	
-			// Text
-			else if (i == 1) 												
-			{	// Store line as hexidecimal
-				hexidecimal = std::stoi(line.c_str(),0,16);
-				load_code(hexidecimal);
 			}
 		}
 	}
@@ -94,13 +94,13 @@ Memory::Memory()
 	accum_file_code.close();
 }
 
-// Loads from .text section
+// Loads memory from the .text section
 bool Memory::load_code(mem_addr memory_address_in)
 {
 	text_next_open_memory_location++;					
 	// Checks the memory length					
 	if (text_next_open_memory_location < TEXT_LENGTH)						
-	{ // Stores the instruction
+	{ 	// Stores the instruction
 		text_segment[text_next_open_memory_location] = memory_address_in;	
 		return true;
 	}
@@ -111,7 +111,7 @@ bool Memory::load_code(mem_addr memory_address_in)
 	}
 }
 
-// Loads from the .data section
+// Loads memory from the .data section
 bool Memory::load_data(mem_addr memory_address_in, mem_addr data)
 {
 	mem_addr memory_copy_index = memory_address_in;
@@ -149,7 +149,7 @@ bool Memory::write(mem_addr memory_address_in, mem_addr data)
 			int memory_index = (int) decode_address_index(memory_copy_index);
 			// Checks the memory length
 			if (text_next_open_memory_location < STACK_LENGTH)						
-			{	// Store data in the stack
+			{	// Store the data in the stack
 				stack_segment[memory_index] = data;									
 				return true;
 			}
@@ -160,7 +160,7 @@ bool Memory::write(mem_addr memory_address_in, mem_addr data)
 			}
 		}
 		break;
-	default:	// Not in current memory
+	default:	// Not in the current memory
 			cout << "Error: You cannot write to that memory area." << endl;
 			return false;															
 		break;
@@ -169,7 +169,7 @@ bool Memory::write(mem_addr memory_address_in, mem_addr data)
 	return false;
 }
 
-// Reads based on given memory address. Used by LOAD, ADD, and MULT.
+// Reads memory based on given memory address. Used by LOAD, ADD, and MULT.
 mem_addr * Memory::read(mem_addr memory_address_in )
 {	
 	mem_addr memory_copy_bin = memory_address_in, memory_copy_index = memory_address_in;
@@ -205,7 +205,7 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 			}
 		}
 		break;
-	default:	// Not in current memory space
+	default:	// Not in the current memory space
 			cout << "Error: Memory read is not within current memory." << endl;
 			return &stack_top;														
 		break;

@@ -8,7 +8,6 @@ Stack Machine Memory Simulation
 
 #include <cstdlib>
 #include <stdio.h>
-#include <stdint.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -37,8 +36,8 @@ class Memory
 {
 public:
 	Memory();
-	bool load_data(mem_addr memory_address_in, mem_addr data);		
-	bool load_code(mem_addr memory_address_in);						
+	bool load_code(mem_addr memory_address_in);	
+	bool load_data(mem_addr memory_address_in, mem_addr data);							
     bool write(mem_addr memory_address_in, mem_addr data);			
     mem_addr * read(mem_addr memory_address_in);												
 private:
@@ -55,21 +54,26 @@ Memory::Memory()
 	int hexidecimal;
 	int hexidecimal1;
 	int hexidecimal2;
-	mem_addr hexi1;
 	string line;
 	string line1 = "0000000000";
 	string line2 = "0";
 	int i = 0;
-	ifstream stack_file ("stackCode.txt");
-	if (stack_file.is_open())
+	ifstream stack_file_code ("stackCode.txt");
+	if (stack_file_code.is_open())
 	{
-		while ( getline (stack_file,line))
+		while ( getline (stack_file_code,line))
 		{
-			if (line == ""){continue;}
-			if (line == ".data"){i = 0; continue;}	
-			if (line == ".text"){i = 1; continue;}
+			if (line == ""){continue;}	
+			if (line == ".text"){i = 0; continue;}
+			if (line == ".data"){i = 1; continue;}	
+			// Text
+			else if (i == 0) 												
+			{	// Store line as hexidecimal
+				sscanf(line.data(),"%x", &hexidecimal);
+				load_code(hexidecimal);
+			}
 			// Data
-			if (i == 0) 												
+			if (i == 1) 												
 			{	
 				for (int c = 0; c < 10; c++)
 				{
@@ -77,26 +81,37 @@ Memory::Memory()
 					line2[0] = line[11];
 				}
 				// Store line1 as hexidecimal
-				hexidecimal1 = std::stoi(line1.c_str(),0,16);
+				sscanf(line1.data(), "%x", &hexidecimal1);
 				// Store line2 as hexidecimal
 				hexidecimal2 = atoi(line2.c_str());
 				load_data(hexidecimal1,hexidecimal2);
-			}	
-			// Text
-			else if (i == 1) 												
-			{	// Store line as hexidecimal
-				hexidecimal = std::stoi(line.c_str(),0,16);
-				load_code(hexidecimal);
 			}
 		}
 	}
 	else{
 		cout << "Error: Unable to open file."; 
 	}
-	stack_file.close();
+	stack_file_code.close();
 }
 
-// Loads memory from .data section
+// Loads memory from the .text section
+bool Memory::load_code(mem_addr memory_address_in)
+{
+	text_next_open_memory_location++;		
+	// Checks the memory length								
+	if (text_next_open_memory_location < TEXT_LENGTH)						
+	{	// Stores the instruction
+		text_segment[text_next_open_memory_location] = memory_address_in;	
+		return true;
+	}
+	else
+	{	// No More memory open	
+		cout << "Error: Please expand space for Text Memory." << endl;
+		return false;														
+	}
+}
+
+// Loads memory from the .data section
 bool Memory::load_data(mem_addr memory_address_in, mem_addr data)
 {
 	mem_addr memory_copy_index = memory_address_in;
@@ -111,23 +126,6 @@ bool Memory::load_data(mem_addr memory_address_in, mem_addr data)
 	else
 	{	// No More memory open
 		cout << "Error: Please expand space for Data Memory." << endl;
-		return false;														
-	}
-}
-
-// Loads memory from .text section
-bool Memory::load_code(mem_addr memory_address_in)
-{
-	text_next_open_memory_location++;		
-	// Checks the memory length								
-	if (text_next_open_memory_location < TEXT_LENGTH)						
-	{	// Stores the instruction
-		text_segment[text_next_open_memory_location] = memory_address_in;	
-		return true;
-	}
-	else
-	{	// No More memory open	
-		cout << "Error: Please expand space for Text Memory." << endl;
 		return false;														
 	}
 }
@@ -180,7 +178,7 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	case 1:
 		{
 			int memory_index = (int) decode_address_index(memory_copy_index);	
-			// Checks text memory length								
+			// Checks the text memory length								
 			if (memory_index < TEXT_LENGTH)											
 			{
 				return &text_segment[memory_index];
@@ -190,7 +188,7 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	case 2:
 		{
 			int memory_index = (int) decode_address_index(memory_copy_index);
-			// Checks data memory length
+			// Checks the data memory length
 			if (text_next_open_memory_location < DATA_LENGTH)						
 			{
 				return &data_segment[memory_index];									
@@ -200,14 +198,14 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 	case 3:
 		{
 			int memory_index = (int) decode_address_index(memory_copy_index);
-			// Checks stack memory length
+			// Checks the stack memory length
 			if (text_next_open_memory_location < STACK_LENGTH)						
 			{
 				return &stack_segment[memory_index];									
 			}
 		}
 		break;
-	default:	// Not in current memory
+	default:	// Not in the current memory space
 			cout << "Error: Memory read is not within current memory." << endl;
 			return &stack_top;														
 		break;
@@ -220,7 +218,7 @@ mem_addr * Memory::read(mem_addr memory_address_in )
 int Memory::decode_address_bin(mem_addr memory_address_in)
 {	// Shifts all bits to the left 7
 	memory_address_in = memory_address_in << 7;
-	/// Shifts all bits to the right 27
+	// Shifts all bits to the right 27
 	memory_address_in = memory_address_in >> 27;
 	return memory_address_in;
 	// 0 = kernal, 1 = text, 2 = data, 3 = stack, and (-1) = error
@@ -230,7 +228,7 @@ int Memory::decode_address_bin(mem_addr memory_address_in)
 int Memory::decode_address_index(mem_addr memory_address_in)
 {	// Shifts all bits to the left 15
 	memory_address_in = memory_address_in << 15;	
-	// Shifts all bits to the righ 15
+	// Shifts all bits to the right 15
 	memory_address_in = memory_address_in >> 15;
 	return memory_address_in;
 }
