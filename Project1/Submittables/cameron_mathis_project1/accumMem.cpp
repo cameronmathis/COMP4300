@@ -42,7 +42,8 @@ public:
     mem_addr * read(mem_addr memory_address_in);					
 private:
 	int decode_address_bin(mem_addr memory_address_in);				
-	int decode_address_index(mem_addr memory_address_in);			
+	int decode_address_index(mem_addr memory_address_in);		
+	string trim(string& str);	
 	// Internal counter for text_segment
 	int text_next_open_memory_location;								
 };
@@ -60,20 +61,32 @@ Memory::Memory()
 	int i = 0;
 	ifstream accum_file_code ("accumCode.txt");
 	if (accum_file_code.is_open())
-	{
+	{	
 		while ( getline (accum_file_code,line))
-		{
-			if (line == ""){continue;}	
-			if (line == ".text"){i = 0; continue;}
-			if (line == ".data"){i = 1; continue;}	
+		{	
+			line = line.substr(0, line.size()-1);
+			if (line.compare("") == 0)
+			{	
+				continue;
+			}	
+			if (line.compare(".text") == 0)
+			{	
+				i = 0; 
+				continue;
+			}
+			if (line.compare(".data") == 0)
+			{	
+				i = 1; 
+				continue;
+			}
 			// Text
-			else if (i == 0) 												
+			if (i == 0) 												
 			{	// Store line as hexidecimal
 				sscanf(line.data(),"%x", &hexidecimal);
 				load_code(hexidecimal);
 			}
 			// Data
-			if (i == 1) 												
+			else if (i == 1) 												
 			{	
 				for (int c = 0; c < 10; c++)
 				{
@@ -231,4 +244,14 @@ int Memory::decode_address_index(mem_addr memory_address_in)
 	// Shifts all bits to the right 15 
 	memory_address_in = memory_address_in >> 15;
 	return memory_address_in;
+}
+
+// Trim whitespace from a string
+string Memory::trim(string& str)
+{
+    size_t first = str.find_first_not_of(' ');
+    if (first == std::string::npos)
+        return "";
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last-first+1));
 }

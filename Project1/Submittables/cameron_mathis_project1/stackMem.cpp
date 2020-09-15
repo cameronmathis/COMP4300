@@ -63,9 +63,21 @@ Memory::Memory()
 	{
 		while ( getline (stack_file_code,line))
 		{
-			if (line == ""){continue;}	
-			if (line == ".text"){i = 0; continue;}
-			if (line == ".data"){i = 1; continue;}	
+			line = line.substr(0, line.size()-1);
+			if (line.compare("") == 0)
+			{	
+				continue;
+			}	
+			if (line.compare(".text") == 0)
+			{	
+				i = 0; 
+				continue;
+			}
+			if (line.compare(".data") == 0)
+			{	
+				i = 1; 
+				continue;
+			}	
 			// Text
 			else if (i == 0) 												
 			{	// Store line as hexidecimal

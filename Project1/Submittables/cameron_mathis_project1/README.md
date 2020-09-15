@@ -86,13 +86,13 @@ Notes
 
 If you take a look in these, they will have two main sections; ".data" and ".text".
 
->".data"
-
-This is where the beginning information is provided for the computation.
-
 >".text"
 
 This is where the binary for the code is.
+
+>".data"
+
+This is where the beginning information is provided for the computation.
 
 
 #### Thoughts ####
@@ -107,3 +107,11 @@ This is where the binary for the code is.
 
 > I ended up going with the instruction being 32 bits because that is what we covered in class. <br/>
 > Since I was forced to have an 8 bit operation code, I was only left 24 bits for the memory address.
+
+
+#### Issues ####
+************************************
+
+> The main issue I had when developing my simulators was that my code would compile and run correctly in VSCode, but not even compile on the TUX machines. <br/>
+> I ended up fixing the compile issue, and then my code was running differently on the TUX machines than it did on in VSCode. <br/>
+> This was because of the way the TUX machines were reading in lines from the stackCode and accumCode files. For some reason, if I remove the last character of the line read in then it ran fine. I think it was reading it a whitespace or return or something.
