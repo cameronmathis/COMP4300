@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 #include <math.h>
+#include <cstring>
 
 
 #define TEXT_LENGTH  50

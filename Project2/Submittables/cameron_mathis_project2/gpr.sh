@@ -1,12 +1,11 @@
 #1/bin/bash
-#----------------------------------
+#---------------------------------
 # COMP 4300
 # Cameron Mathis
 # Project 2
 # 10/20/20
 # General Purpose Register Machine
-#----------------------------------
-
+#---------------------------------
 case $1 in
 	compile)
 		g++ gprSim.cpp -std=c++11 -o gprSimulator.out
