@@ -2,7 +2,7 @@
 	COMP 4300
 	Cameron Mathis
 	Project 2
-	10/04/20
+	10/20/20
 	General Purpose Register Machine Memory Simulation
 ********/
 
@@ -55,7 +55,7 @@ private:
 	int decode_address_index(mem_addr memory_address_in);			//Helps decode address into array index
 	int text_next_open_memory_location;								//Internal counter for text_segment
 	int length_of_string(mem_addr memory_address_in, int max_length);//Helper to find the end of string in memory.
-	mem_addr mem_byte(instruction data_in,int byte_number);		//returns a byte inside the instruction.
+	mem_addr mem_byte(instruction data_in,int byte_number);			//returns a byte inside the instruction.
 	mem_addr mem_byte_string(instruction data_in,int byte_number);  //returns a byte for a string.
 };
 

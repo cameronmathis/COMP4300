@@ -1,31 +1,26 @@
 COMP 4300
 =====================
-Cameron Mathis
-Project 2
-10/04/20
+Cameron Mathis - clm0081 </br>
+Project 2 </br>
+10/20/20 </br>
+
 
 Overview: 
 -------------
 
-We have upgraded out single register accumulator to a functioning MIPS machine. Not all instructions of the MIPS ISA are implemented in this machine, but 12 are. The code this machine runs can be found in gprCode.txt.
+I upgraded out single register accumulator to a functioning MIPS machine. Not all instructions of the MIPS ISA are implemented in this machine, but 12 are. The code this machine runs can be found in gprCode.txt.
 
 The written code evaluates if an entered word is a palindrome. For this program spaces are seen as an ending character. For example:
 
-	Please enter a word: palindrome
-	The string is not a palindrome.
+> Please enter a word: palindrome </br>
+> The string is not a palindrome.
 
-OR
+or
 
-	Please enter a word: theeht
-	The string is a palindrome.
-
+> Please enter a word: theeht </br>
+> The string is a palindrome.
 
 To run the machine, look below!
-
-Happy simulating
-
-War Eagle.
-
 
 
 Simple MIPS Machine
@@ -35,42 +30,42 @@ Simple MIPS Machine
 
 Open up the terminal navigate to this project and run:
 	
-	$ make
+	$ ./gpr.sh compile
 
 You should see this:
 
->g++ -c gprMem.cpp -o gprMem.o
->g++ -c gprReg.cpp -o gprReg.o
->g++ gprSim.cpp -o gprSimulator.o
+>g++ -c gprMem.cpp -o gprMemory.out </br>
+>g++ -c gprReg.cpp -o gprRegister.out </br>
+>g++ gprSim.cpp -o gprSimulator.out 
 
 Run: 
 
-	$ ./gprSimulator.o
+	$ ./gpr.sh run
 
-You should see this: (With original code)
+You should see this:
 
 >Please enter a word:
 
-Enter any word and hit enter. If it is a palindrome the program will tell you!
+Enter any word and hit enter.
 
 Once you are done run:
 	
-	$ make clean
+	$ ./gpr.sh clean
 
 This will clean up the folder.
-
 
 
 Notes
 -------------
 
-#### "..type..Code.txt" Files ####
+#### "palindrome.s" File ####
+************************************
 
 If you take a look in these, they will have two main sections; ".text" and ".data".
 
 >".text"
 
-This is where the binary for the code is. Humans read it as addi $t1, $t1, 1 the computer reads it as "0x01323281". Weird huh?
+This is where the binary for the code is.
 
 >".data"
 

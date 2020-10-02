@@ -2,7 +2,7 @@
 	COMP 4300
 	Cameron Mathis
 	Project 2
-	10/04/20
+	10/20/20
 	General Purpose Register Machine Registers Simulation
 ********/
 
