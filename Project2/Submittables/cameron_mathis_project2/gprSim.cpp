@@ -14,73 +14,62 @@
 
 using namespace std;
 
-class Sim
-{
-public:
-	Sim();										
-	void run();									
-private:
-	int instruction_op();						
-	mem_addr instruction_memory_address();		
-	mem_addr first_register();					
-	mem_addr second_register();					
-	mem_addr third_register();					
-	mem_addr immediate_value();					
-	void load_next_instruction();		
-	// Program counter		
-	mem_addr pc;								
-	// Pointer to the current instruction
-	instruction *current_instruction;			
-	// Memory object
-	Memory *mem;								
-	// CPU internal registers
-	Register_Bank *registers;					
-	int8_t signed_immediate(mem_addr m_addr);  
+class Sim {
+	public:
+		Sim();										
+		void run();									
+	private:
+		int instruction_op();						
+		mem_addr instruction_memory_address();		
+		mem_addr first_register();					
+		mem_addr second_register();					
+		mem_addr third_register();					
+		mem_addr immediate_value();					
+		void load_next_instruction();		
+		// Program counter		
+		mem_addr pc;								
+		// Pointer to the current instruction
+		instruction *current_instruction;			
+		// Memory object
+		Memory *mem;								
+		// CPU internal registers
+		Register_Bank *registers;					
+		int8_t signed_immediate(mem_addr m_addr);  
 };
 
-int main()
-{
+int main() {
 	Sim *sim = new Sim();
 	sim->run();
 	return 0;
 }
 
 // Starts state of simulator and initializes memory
-Sim::Sim()
-{
+Sim::Sim() {
 	pc = text_top;
 	mem = new Memory();
 	registers = new Register_Bank();
 }
 
 // This is the simulation
-void Sim::run()
-{
-
+void Sim::run() {
 	bool more_instructions = true;
 	int total_instructions_executed = 0;
 	int total_cycles_spent = 0;
-	while(more_instructions)
-	{
+	while(more_instructions) {
 		load_next_instruction();
-		switch(instruction_op())
-		{
-			case 1: // ADDI: ADD IMMEDIATE 
-			{
+		switch(instruction_op()) {
+			case 1: { // ADDI: ADD IMMEDIATE 
 				int8_t immediate = signed_immediate(third_register());
 				uint32_t register_value = registers->read(second_register());
 				bool success = registers->write(first_register(), immediate + register_value);
-				if (false == success)
-				{
+				if (false == success) {
 					cout << "Error: Adding value to register: "<< std::dec << second_register() << endl;
 				}
-				
 				total_instructions_executed += 1;
 				total_cycles_spent += 6;
 				break;
 			}
-			case 2: // B: BRANCH
-			{
+			case 2: { // B: BRANCH
 				int8_t label_offset =0;
 				label_offset = signed_immediate(third_register());
 				pc += label_offset;
@@ -89,117 +78,92 @@ void Sim::run()
 				total_cycles_spent += 4;
 				break;
 			}
-			case 3: // BEQZ: BRACH IF EQUAL TO ZERO
-			{
+			case 3: { // BEQZ: BRACH IF EQUAL TO ZERO
 				int8_t label_offset =0;
-				if (registers->read(first_register()) == 0)
-				{
+				if (registers->read(first_register()) == 0) {
 					label_offset = signed_immediate(third_register());
 					pc += label_offset;
 				}
-				
 				total_instructions_executed += 1;
 				total_cycles_spent += 5;
 				break;
 			}
-			case 4: // BGE: BRANCH IF GREATER OR EQUAL
-			{
+			case 4: { // BGE: BRANCH IF GREATER OR EQUAL
 				int8_t label_offset =0;
-				if ( registers->read(first_register())  >=  registers->read(second_register()))
-				{
+				if ( registers->read(first_register())  >=  registers->read(second_register())) {
 					label_offset = signed_immediate(third_register());
 					pc += label_offset;
 				}
-				
 				total_instructions_executed += 1;
 				total_cycles_spent += 5;
 				break;
 			}
-			case 5: // BNE: BRANCH IF NOT EQUAL
-			{
+			case 5: { // BNE: BRANCH IF NOT EQUAL
 				int8_t label_offset =0;
-				if ( registers->read(first_register())  !=  registers->read(second_register()))
-				{
+				if ( registers->read(first_register())  !=  registers->read(second_register())) {
 					label_offset = signed_immediate(third_register());
 					pc += label_offset;
 				}
-				
 				total_instructions_executed += 1;
 				total_cycles_spent += 5;
 				break;
 			}
-			case 6: // LA: LOAD ADDRESS
-			{
+			case 6: { // LA: LOAD ADDRESS
 				bool success = registers->write(first_register(),immediate_value());
-				if (false == success)
-				{
+				if (false == success) {
 					cout << "Error: Loading Address to register: "<< std::dec << first_register() << endl;
 				}
-				
 				total_instructions_executed += 1;
 				total_cycles_spent += 5;
 				break;
 			}
-			case 7: // LB: LOAD BYTE
-			{
-				mem_addr address_value = registers->read(second_register()); 		// number of bytes
+			case 7: { // LB: LOAD BYTE
+				// number of bytes
+				mem_addr address_value = registers->read(second_register()); 
 				int8_t immediate = signed_immediate(third_register());
 				address_value += immediate;
 				bool success = registers->write(first_register(),mem->read_byte(address_value, address_value%4) );
-				if (false == success)
-				{
+				if (false == success) {
 					cout << "Error: Loading Byte into register: "<< std::dec << first_register() << endl;
 				}
-				
 				total_instructions_executed += 1;
 				total_cycles_spent += 6;
 				break;
 			}
-			case 8: // LI: LOAD IMMEDIATE 
-			{
+			case 8: { // LI: LOAD IMMEDIATE
 				bool success = registers->write(first_register(), second_register());
-				if (false == success)
-				{
+				if (false == success) {
 					cout << "Error: Loading Immediate value to register: "<< std::dec << first_register() << endl;
 				}
-				
 				total_instructions_executed += 1;
 				total_cycles_spent += 3;
 				break;
 			}
-			case 9: // SUBI: SUBTRACT IMMEDIATE
-			{
+			case 9: { // SUBI: SUBTRACT IMMEDIATE
 				int8_t immediate = signed_immediate(third_register());
 				uint32_t register_value = registers->read(second_register());
 				bool success = registers->write(first_register(), register_value - immediate);
-				if (false == success)
-				{
+				if (false == success) {
 					cout << "Error: Adding value to register: "<< std::dec << second_register() << endl;
 				}
 				total_instructions_executed += 1;
 				total_cycles_spent += 6;
 				break;
 			}
-			case 10: // SYSCALL
-			{
+			case 10: { // SYSCALL
 				total_instructions_executed += 1;
 				total_cycles_spent += 8;
-				
-				switch(registers->read(3))
-				{
-					case 4:	// Print String 
-					{
+				switch(registers->read(3)) {
+					case 4:	{ // Print String
 						cout << mem->read_string(registers->read(1)) << endl;
 						break;
 					}
-					case 8:	// Read String In
-					{
+					case 8:	{ // Read String In
 						char palin[1024];
 						string incoming_palin;
-						
 						int length=1024;
-					    for (int i=0;i<1024;i++)		// Clear memory
-					    {
+						// Clear memory
+					    for (int i=0; i<1024; i++) {
 					            palin[i]=0;
 					    }
 						cout << "Please enter a word: ";
@@ -210,8 +174,7 @@ void Sim::run()
 						mem->load_string(registers->read(1),palin);
 						break;
 					}
-					case 10:	// End Program
-					{
+					case 10: { // End Program
 						more_instructions = false;
 						cout << endl;
 						cout << "Number of Instructions Executed (IC): " << std::dec<< total_instructions_executed << endl;
@@ -220,8 +183,7 @@ void Sim::run()
 						cout << "Goodbye." << endl;
 						break;
 					}
-					default:
-					{
+					default: {
 						cout << "Error: There was an error with the execution of SYSCALL." << endl;
 						cout << "PC: " << std::hex << pc << endl;
 						cout << "Current Istruction: " <<std::hex << current_instruction << endl;
@@ -231,27 +193,25 @@ void Sim::run()
 				}
 				break;
 			}
-			case 11:	// LOAD
-			{
+			case 11: { // LOAD
 				cout << "Error: LOAD Instruction not implemented." << endl;
 				break;
 			}
-			case 12:	// STORE
-			{
+			case 12: { // STORE
 				cout << "Error: STORE Instruction not implemented." << endl;
 				break;
 			}
-			default:
+			default: {
 				more_instructions = false;
 				break;
+			}
 		}
 	}
 }
 
 // Removes the memory address from instruction, bits 32-24
 // Returns the op code of internal current instruction
-int Sim::instruction_op()
-{															
+int Sim::instruction_op() {															
 	instruction op_value;					
 	op_value = *current_instruction;
 	op_value = op_value >> 24;
@@ -260,8 +220,7 @@ int Sim::instruction_op()
 
 // Removes the op code, resets to correct value, bits 24-0
 // Returns the memory address of internal current instruction (last 24 bits)
-mem_addr Sim::instruction_memory_address()
-{															
+mem_addr Sim::instruction_memory_address() {															
 	instruction memory_address;
 	memory_address = *current_instruction;
 	memory_address = memory_address << 8;
@@ -271,8 +230,7 @@ mem_addr Sim::instruction_memory_address()
 
 // Left most register slot in instruciton
 // Returns bits 24 - 16
-mem_addr Sim::first_register()									
-{
+mem_addr Sim::first_register() {
 	instruction memory_address;
 	memory_address = *current_instruction;
 	memory_address = memory_address << 8;
@@ -282,8 +240,7 @@ mem_addr Sim::first_register()
 
 // Center register slot in instruction
 // Returns bits 16-8
-mem_addr Sim::second_register()									
-{
+mem_addr Sim::second_register() {
 	instruction memory_address;
 	memory_address = *current_instruction;
 	memory_address = memory_address << 16;
@@ -293,8 +250,7 @@ mem_addr Sim::second_register()
 
 // Right most register slot in instruction
 // Returns bits 8-0
-mem_addr Sim::third_register()									
-{
+mem_addr Sim::third_register() {
 	instruction memory_address;
 	memory_address = *current_instruction;
 	memory_address = memory_address << 24;
@@ -304,8 +260,7 @@ mem_addr Sim::third_register()
 
 // Gives value of immediate slot
 // Returns bits 16-0
-mem_addr Sim::immediate_value()									
-{
+mem_addr Sim::immediate_value() {
 	instruction memory_address;
 	memory_address = *current_instruction;
 	memory_address = memory_address << 16;
@@ -315,28 +270,23 @@ mem_addr Sim::immediate_value()
 
 // Returns a signed value
 // Helper method for handling immediates and signing them correctly
-int8_t Sim::signed_immediate(mem_addr m_addr)				
-{
+int8_t Sim::signed_immediate(mem_addr m_addr) {
 	mem_addr sign_bit = m_addr, value = m_addr;
 	sign_bit = sign_bit >> 7;
 	value = value <<26;
 	value = value >>26;
 	int return_value = 0;
-	if (sign_bit == 1)
-	{
+	if (sign_bit == 1) {
 		return_value = 0 -value;
 		return return_value;
-	}
-	else
-	{
+	} else {
 		return value;
 	}
 	return 0;
 }
 
 // Takes all the steps to load next instruction
-void Sim::load_next_instruction()
-{															
+void Sim::load_next_instruction() {															
 	current_instruction = mem->read(pc);
 	pc++;
 }

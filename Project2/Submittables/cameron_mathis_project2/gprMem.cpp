@@ -397,7 +397,7 @@ mem_addr Memory::mem_byte(instruction data_in, int byte_number) {
 mem_addr Memory::mem_byte_string(instruction data_in, int byte_number) {																					
 	if (byte_number < 5 && byte_number > 0) {
 		byte_number --;
-		switch(byte_number)	{	// Had to be done because of big Indian to little Indian flip
+		switch(byte_number)	{ // Had to be done because of big Indian to little Indian flip
 			case 0: {
 				byte_number =3;
 				break;
