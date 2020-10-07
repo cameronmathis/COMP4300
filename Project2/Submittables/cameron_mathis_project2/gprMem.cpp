@@ -36,25 +36,24 @@ instruction text_segment[TEXT_LENGTH];
 mem_addr data_segment[DATA_LENGTH];
 mem_addr stack_segment[STACK_LENGTH];
 
-class Memory
-{
-public:
-	Memory();
-	bool load_code(mem_addr memory_address_in);						
-	bool load_data(mem_addr memory_address_in, mem_addr data);		
-    bool write(mem_addr memory_address_in, mem_addr data);			
-    mem_addr * read(mem_addr memory_address_in);					
-    bool load_string(mem_addr m_add, char string_to_be_stored[]);	
-    string read_string(mem_addr memory_address);					
-    mem_addr read_byte(mem_addr memory_address_in, int byte);		
-private:
-	int decode_address_bin(mem_addr memory_address_in);				
-	int decode_address_index(mem_addr memory_address_in);	
-	// Internal counter for text_segment		
-	int text_next_open_memory_location;								
-	int length_of_string(mem_addr memory_address_in, int max_length);
-	mem_addr mem_byte(instruction data_in,int byte_number);			
-	mem_addr mem_byte_string(instruction data_in,int byte_number);  
+class Memory {
+	public:
+		Memory();
+		bool load_code(mem_addr memory_address_in);						
+		bool load_data(mem_addr memory_address_in, mem_addr data);		
+    	bool write(mem_addr memory_address_in, mem_addr data);			
+    	mem_addr * read(mem_addr memory_address_in);					
+    	bool load_string(mem_addr m_add, char string_to_be_stored[]);	
+    	string read_string(mem_addr memory_address);					
+    	mem_addr read_byte(mem_addr memory_address_in, int byte);		
+	private:
+		int decode_address_bin(mem_addr memory_address_in);				
+		int decode_address_index(mem_addr memory_address_in);	
+		// Internal counter for text_segment		
+		int text_next_open_memory_location;								
+		int length_of_string(mem_addr memory_address_in, int max_length);
+		mem_addr mem_byte(instruction data_in,int byte_number);			
+		mem_addr mem_byte_string(instruction data_in,int byte_number);  
 };
 
 /*******
