@@ -12,12 +12,12 @@ I upgraded out single register accumulator to a functioning MIPS machine. Not al
 
 The written code evaluates if an entered word is a palindrome. For this program spaces are seen as an ending character. For example:
 
-> Please enter a word: palindrome </br>
+> Please enter a word: nascar </br>
 > The string is not a palindrome.
 
 or
 
-> Please enter a word: theeht </br>
+> Please enter a word: racecar </br>
 > The string is a palindrome.
 
 To run the machine, look below!
