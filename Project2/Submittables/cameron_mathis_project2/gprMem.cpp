@@ -39,9 +39,7 @@ mem_addr stack_segment[STACK_LENGTH];
 class Memory {
 	public:
 		Memory();
-		bool load_code(mem_addr memory_address_in);						
-		bool load_data(mem_addr memory_address_in, mem_addr data);		
-    	bool write(mem_addr memory_address_in, mem_addr data);			
+		bool load_code(mem_addr memory_address_in);			
     	mem_addr * read(mem_addr memory_address_in);					
     	bool load_string(mem_addr m_add, char string_to_be_stored[]);	
     	string read_string(mem_addr memory_address);					
@@ -112,58 +110,8 @@ bool Memory::load_code(mem_addr memory_address_in) {
 	}
 }
 
-// Loads from .data section
-bool Memory::load_data(mem_addr memory_address_in, mem_addr data) {
-	mem_addr memory_copy_index = memory_address_in;
-	int memory_index = (int) decode_address_index(memory_copy_index);
-	// Checks memory length
-	if (text_next_open_memory_location < DATA_LENGTH) {					
-		// Stores data
-		data_segment[memory_index] = data;									
-		return true;
-	} else {	
-		// No More memory open
-		cout << "Error: Please expand space for Data Memory." << endl;
-		return false;														
-	}
-}
-
-// Writes to stack section
-bool Memory::write(mem_addr memory_address_in, mem_addr data) {
-	mem_addr memory_copy_bin = memory_address_in, memory_copy_index = memory_address_in;
-	switch(decode_address_bin(memory_copy_bin)) {
-		case 1: {
-			cout << "Error: You do not have the correct user privileges to write to text segment." << endl;
-			return false;
-		} break;
-		case 2: {
-			cout << "Error: You do not have the correct user privileges to write to data segment." << endl;
-			return false;
-		} break;
-		case 3: {
-			int memory_index = (int) decode_address_index(memory_copy_index);
-			// Checks memory length
-			if (memory_index < STACK_LENGTH) {										
-				// Store data in stack
-				stack_segment[memory_index] = data;									
-				return true;
-			} else {		
-				// No More stack open
-				cout << "Error: Please expand space for Stack Memory" << endl;
-				return false;														
-			}
-		} break;
-		default: {
-			// Not in current memory
-			cout << "Error: You cannot write to that memory area." << endl;
-			return false;															
-		} break;
-	}
-	cout << "Error: Memory write went wrong." << endl;
-	return false;
-}
-
 // Reads based on given memory address
+// Used in the load_next_instruction() method of the simulator
 mem_addr * Memory::read(mem_addr memory_address_in) {	
 	mem_addr memory_copy_bin = memory_address_in, memory_copy_index = memory_address_in;
 	switch(decode_address_bin(memory_copy_bin)) {
@@ -199,6 +147,7 @@ mem_addr * Memory::read(mem_addr memory_address_in) {
 }
 
 // Write given string to memory
+// Used in the system call portion of the simulator
 bool Memory::load_string(mem_addr m_add, char string_to_be_stored[]) {
 	switch(decode_address_bin(m_add)) {
 		case 1: { // TEXT  
@@ -234,6 +183,7 @@ bool Memory::load_string(mem_addr m_add, char string_to_be_stored[]) {
 
 // Read a string from memory
 // Built for reading strings across memory segments
+// Used in the system call portion of the simulator
 string Memory::read_string(mem_addr memory_address) {	
 	switch(decode_address_bin(memory_address)) {
 		case 1: { // TEXT  
@@ -270,6 +220,7 @@ string Memory::read_string(mem_addr memory_address) {
 }
 
 // Reads byte at given address
+// Used in theload byte portion of the simulator
 mem_addr Memory::read_byte(mem_addr memory_address_in, int byte) {
 	mem_addr memory_copy_bin = memory_address_in, memory_copy_index = memory_address_in;
 	int memory_index = (int) decode_address_index(memory_copy_index);
@@ -378,7 +329,6 @@ int Memory::length_of_string(mem_addr memory_address_in, int max_length) {
 }
 
 // Returns a byte inside the instruction
-// Returns a byte inside the instruction.
 mem_addr Memory::mem_byte(instruction data_in, int byte_number) {																					
 	if (byte_number < 5 && byte_number > 0) {
 		byte_number --;
@@ -393,7 +343,6 @@ mem_addr Memory::mem_byte(instruction data_in, int byte_number) {
 } 
 
 // Returns a byte for a string
-// Returns a byte inside the instruction.
 mem_addr Memory::mem_byte_string(instruction data_in, int byte_number) {																					
 	if (byte_number < 5 && byte_number > 0) {
 		byte_number --;

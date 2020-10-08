@@ -20,7 +20,6 @@ class Sim {
 		void run();									
 	private:
 		int instruction_op();						
-		mem_addr instruction_memory_address();		
 		mem_addr first_register();					
 		mem_addr second_register();					
 		mem_addr third_register();					
@@ -180,7 +179,6 @@ void Sim::run() {
 						cout << "Number of Instructions Executed (IC): " << std::dec<< total_instructions_executed << endl;
 						cout << "Number of Cycles Spent in Execution (C): " <<std::dec<<  total_cycles_spent << endl;
 						printf("Speed-up: %3.2F \n",(8.0*total_instructions_executed) / total_cycles_spent );
-						cout << "Goodbye." << endl;
 						break;
 					}
 					default: {
@@ -216,16 +214,6 @@ int Sim::instruction_op() {
 	op_value = *current_instruction;
 	op_value = op_value >> 24;
 	return op_value;
-}
-
-// Removes the op code, resets to correct value, bits 24-0
-// Returns the memory address of internal current instruction (last 24 bits)
-mem_addr Sim::instruction_memory_address() {															
-	instruction memory_address;
-	memory_address = *current_instruction;
-	memory_address = memory_address << 8;
-	memory_address = memory_address >> 8;
-	return memory_address;
 }
 
 // Left most register slot in instruciton

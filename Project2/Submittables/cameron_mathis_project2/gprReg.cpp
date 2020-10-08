@@ -27,7 +27,7 @@ class Register_Bank {
 	public:
 		Register_Bank();
     	bool write(mem_addr memory_address_in, mem_addr data);			
-    	uint32_t read(mem_addr memory_address_in);												
+    	mem_addr read(mem_addr memory_address_in);												
 };
 
 /*******
@@ -40,6 +40,7 @@ Register_Bank::Register_Bank() {
 }
 
 // Writes to a register
+// Used in the add, subtract, and load portions of the simulator
 bool Register_Bank::write(mem_addr memory_address_in, mem_addr data) {
 	if (memory_address_in > REGISTER_LENGTH) {
 		cout << "Error: Register write is out of bounds." << endl;
@@ -53,6 +54,7 @@ bool Register_Bank::write(mem_addr memory_address_in, mem_addr data) {
 }
 
 // Reads based on given memory address
+// Used in the add, subtract, branch, and system call portions of the simulator
 mem_addr Register_Bank::read(mem_addr memory_address_in ) {
 	if (memory_address_in > REGISTER_LENGTH) {
 		cout << "Error: Register read is out of bounds." << endl;

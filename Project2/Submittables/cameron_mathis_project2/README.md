@@ -75,14 +75,6 @@ This is where the beginning information is provided for the computation.
 #### Thoughts and Issues ####
 ************************************
 
-###### Memory Address Length ######
-
-> We had to change the default structure of our memory to fit in the MIPS architecture. We ran into several issues including finding bytes in memory segments, storing strings across several words of memory, and dealing with signed integers. We will need to upgrade the memory to reference individual bytes of memory for the next project instead of words of memory.
-
 ###### MIPS in general ######
 
-> We ran into a bug where the 32bit integer notation actually flipped the way the characters were stored. Some special functions had to be built to retrieve strings. 
-
-###### MIPS in general ######
-
-> We were very surprised to find MIPS does not have a SUBI, they just ask the programers to add a negative number. It seems very useful to have a limited set of instructions available, although it does mean you go about certain things in a very weird way.
+> I ran into a bug where the 32bit integer notation actually flipped the way the characters were stored. Some special functions had to be built to retrieve strings. 
