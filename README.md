@@ -30,7 +30,7 @@ To run each machine, look at the readme file in project 1 folder!
 Project 2
 -------------
 
-I have upgraded my single register accumulator to a functioning MIPS machine. Not all instructions of the MIPS ISA are implemented in this machine, but 12 are.
+I extended my accumulator-based machine into a General Purpose Register (GPR) machine that runs different instructions in different numbers of cycles (i.e. a multi-cycle machine).
 
 The written code evaluates if an entered word is a palindrome or not. The machine uses a hex interpreter to load code.
 

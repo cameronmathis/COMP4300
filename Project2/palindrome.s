@@ -35,7 +35,3 @@
 0x00002000:"The string is a palindrome."                                    
 0x00002010:"The string is not a palindrome."                                   
 0x00002020:1024                                                                 
-
-
-
-

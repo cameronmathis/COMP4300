@@ -8,7 +8,7 @@ Project 2 </br>
 Overview: 
 -------------
 
-I upgraded out single register accumulator to a functioning MIPS machine. Not all instructions of the MIPS ISA are implemented in this machine, but 12 are. The code this machine runs can be found in gprCode.txt.
+I extended my accumulator-based machine into a General Purpose Register (GPR) machine that runs different instructions in different numbers of cycles (i.e. a multi-cycle machine). The code this machine runs can be found in gprCode.txt.
 
 The written code evaluates if an entered word is a palindrome. For this program spaces are seen as an ending character. For example:
 
@@ -28,17 +28,11 @@ Simple MIPS Machine
 
 #### Compile MIPS Machine ####
 
-Open up the terminal navigate to this project and run:
+In order to compile the GPR, navigate to the project folder and run the command:
 	
 	$ ./gpr.sh compile
 
-You should see this:
-
->g++ -c gprMem.cpp -o gprMemory.out </br>
->g++ -c gprReg.cpp -o gprRegister.out </br>
->g++ gprSim.cpp -o gprSimulator.out 
-
-Run: 
+In order to run the GPR, run the command: 
 
 	$ ./gpr.sh run
 
@@ -46,13 +40,13 @@ You should see this:
 
 >Please enter a word:
 
-Enter any word and hit enter.
+Type any word and hit enter.
 
-Once you are done run:
+Once you are done simulating the GPR run:
 	
 	$ ./gpr.sh clean
 
-This will clean up the folder.
+This will clean up the project folder.
 
 
 Notes
@@ -61,7 +55,7 @@ Notes
 #### "palindrome.s" File ####
 ************************************
 
-If you take a look in these, they will have two main sections; ".text" and ".data".
+This file has two main sections; ".text" and ".data".
 
 >".text"
 
@@ -77,4 +71,4 @@ This is where the beginning information is provided for the computation.
 
 ###### MIPS in general ######
 
-> I ran into a bug where the 32bit integer notation actually flipped the way the characters were stored. Some special functions had to be built to retrieve strings. 
+> I ran into a problem where the 32bit integer notation actually flipped the way the characters were stored. As a resut, some special functions had to be built to retrieve strings. 
