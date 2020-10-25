@@ -9,8 +9,8 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <iostream>
-#include "gprMem.cpp"
-#include "gprReg.cpp"
+#include "gprMemory.cpp"
+#include "gprRegister.cpp"
 
 using namespace std;
 
@@ -19,12 +19,12 @@ class Sim {
 		Sim();										
 		void run();									
 	private:
-		int instruction_op();						
+		int instructionOperation();						
 		mem_addr first_register();					
 		mem_addr second_register();					
 		mem_addr third_register();					
 		mem_addr immediate_value();					
-		void load_next_instruction();		
+		void loadNextInstruction();		
 		// Program counter		
 		mem_addr pc;								
 		// Pointer to the current instruction
@@ -53,10 +53,10 @@ Sim::Sim() {
 void Sim::run() {
 	bool more_instructions = true;
 	int total_instructions_executed = 0;
-	int total_cycles_spent = 0;
+	int totalCyclesSpent = 0;
 	while(more_instructions) {
-		load_next_instruction();
-		switch(instruction_op()) {
+		loadNextInstruction();
+		switch(instructionOperation()) {
 			case 1: { // ADDI: ADD IMMEDIATE 
 				int8_t immediate = signed_immediate(third_register());
 				uint32_t register_value = registers->read(second_register());
@@ -65,7 +65,7 @@ void Sim::run() {
 					cout << "Error: Adding value to register: "<< std::dec << second_register() << endl;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 6;
+				totalCyclesSpent += 6;
 				break;
 			}
 			case 2: { // B: BRANCH
@@ -74,7 +74,7 @@ void Sim::run() {
 				pc += label_offset;
 				
 				total_instructions_executed += 1;
-				total_cycles_spent += 4;
+				totalCyclesSpent += 4;
 				break;
 			}
 			case 3: { // BEQZ: BRACH IF EQUAL TO ZERO
@@ -84,7 +84,7 @@ void Sim::run() {
 					pc += label_offset;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+				totalCyclesSpent += 5;
 				break;
 			}
 			case 4: { // BGE: BRANCH IF GREATER OR EQUAL
@@ -94,7 +94,7 @@ void Sim::run() {
 					pc += label_offset;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+				totalCyclesSpent += 5;
 				break;
 			}
 			case 5: { // BNE: BRANCH IF NOT EQUAL
@@ -104,7 +104,7 @@ void Sim::run() {
 					pc += label_offset;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+				totalCyclesSpent += 5;
 				break;
 			}
 			case 6: { // LA: LOAD ADDRESS
@@ -113,7 +113,7 @@ void Sim::run() {
 					cout << "Error: Loading Address to register: "<< std::dec << first_register() << endl;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+				totalCyclesSpent += 5;
 				break;
 			}
 			case 7: { // LB: LOAD BYTE
@@ -126,7 +126,7 @@ void Sim::run() {
 					cout << "Error: Loading Byte into register: "<< std::dec << first_register() << endl;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 6;
+				totalCyclesSpent += 6;
 				break;
 			}
 			case 8: { // LI: LOAD IMMEDIATE
@@ -135,7 +135,7 @@ void Sim::run() {
 					cout << "Error: Loading Immediate value to register: "<< std::dec << first_register() << endl;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 3;
+				totalCyclesSpent += 3;
 				break;
 			}
 			case 9: { // SUBI: SUBTRACT IMMEDIATE
@@ -146,12 +146,12 @@ void Sim::run() {
 					cout << "Error: Adding value to register: "<< std::dec << second_register() << endl;
 				}
 				total_instructions_executed += 1;
-				total_cycles_spent += 6;
+				totalCyclesSpent += 6;
 				break;
 			}
 			case 10: { // SYSCALL
 				total_instructions_executed += 1;
-				total_cycles_spent += 8;
+				totalCyclesSpent += 8;
 				switch(registers->read(3)) {
 					case 4:	{ // Print String
 						cout << mem->read_string(registers->read(1)) << endl;
@@ -177,8 +177,8 @@ void Sim::run() {
 						more_instructions = false;
 						cout << endl;
 						cout << "Number of Instructions Executed (IC): " << std::dec<< total_instructions_executed << endl;
-						cout << "Number of Cycles Spent in Execution (C): " <<std::dec<<  total_cycles_spent << endl;
-						printf("Speed-up: %3.2F \n",(8.0*total_instructions_executed) / total_cycles_spent );
+						cout << "Number of Cycles Spent in Execution (C): " <<std::dec<<  totalCyclesSpent << endl;
+						printf("Speed-up: %3.2F \n",(8.0*total_instructions_executed) / totalCyclesSpent );
 						break;
 					}
 					default: {
@@ -207,17 +207,17 @@ void Sim::run() {
 	}
 }
 
-// Removes the memory address from instruction, bits 32-24
-// Returns the op code of internal current instruction
-int Sim::instruction_op() {															
+/* This removes the memory address from instruction, bits 32-24
+ and returns the op code of internal current instruction */
+int Sim::instructionOperation() {															
 	instruction op_value;					
 	op_value = *current_instruction;
 	op_value = op_value >> 24;
 	return op_value;
 }
 
-// Left most register slot in instruciton
-// Returns bits 24 - 16
+/* Left most register slot in instruction
+ and eturns bits 24 - 16 */
 mem_addr Sim::first_register() {
 	instruction memory_address;
 	memory_address = *current_instruction;
@@ -274,7 +274,7 @@ int8_t Sim::signed_immediate(mem_addr m_addr) {
 }
 
 // Takes all the steps to load next instruction
-void Sim::load_next_instruction() {															
+void Sim::loadNextInstruction() {															
 	current_instruction = mem->read(pc);
 	pc++;
 }

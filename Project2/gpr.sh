@@ -8,9 +8,9 @@
 #---------------------------------
 case $1 in
 	compile)
-		g++ gprSim.cpp -std=c++11 -o gprSimulator.out
-		g++ -c gprMem.cpp -std=c++11 -o gprMemory.out
-		g++ -c gprReg.cpp -std=c++11 -o gprRegister.out
+		g++ gprSimulator.cpp -std=c++11 -o gprSimulator.out
+		g++ -c gprMemory.cpp -std=c++11 -o gprMemory.out
+		g++ -c gprRegister.cpp -std=c++11 -o gprRegister.out
 		;;
 	run)
 		./gprSimulator.out

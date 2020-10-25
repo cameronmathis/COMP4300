@@ -1,16 +1,17 @@
 {
     "files.associations": {
+        "ostream": "cpp",
         "*.tcc": "cpp",
-        "exception": "cpp",
-        "memory_resource": "cpp",
+        "string": "cpp",
         "fstream": "cpp",
+        "exception": "cpp",
         "iosfwd": "cpp",
         "new": "cpp",
-        "ostream": "cpp",
         "sstream": "cpp",
         "streambuf": "cpp",
+        "memory_resource": "cpp",
         "istream": "cpp",
         "limits": "cpp",
-        "typeinfo": "cpp"
+        "iostream": "cpp"
     }
 }
