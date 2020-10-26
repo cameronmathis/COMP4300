@@ -1,8 +1,8 @@
 /*******
 	COMP 4300
 	Cameron Mathis
-	Project 2
-	10/20/20
+	Project 2 - Attempt 2
+	11/03/20
 	Register Simulation
 ********/
 
@@ -23,14 +23,14 @@ memoryAddress registers[REGISTER_LENGTH];
 class RegisterBank {
 	public:
 		RegisterBank();
-    	bool write(memoryAddress memoryAddressIn, memoryAddress data);			
-    	memoryAddress read(memoryAddress memoryAddressIn);												
+    	bool writeToRegister(memoryAddress memoryAddressIn, memoryAddress data);			
+    	memoryAddress readFromRegister(memoryAddress memoryAddressIn);												
 };
 
 RegisterBank::RegisterBank() {}
 
 /* Writes to register */
-bool RegisterBank::write(memoryAddress memoryAddressIn, memoryAddress data) {
+bool RegisterBank::writeToRegister(memoryAddress memoryAddressIn, memoryAddress data) {
 	if (memoryAddressIn > REGISTER_LENGTH) {
 		cout << "Error: Register write is out of bounds." << endl;
 		return false;
@@ -43,7 +43,7 @@ bool RegisterBank::write(memoryAddress memoryAddressIn, memoryAddress data) {
 }
 
 /* Reads from register */
-memoryAddress RegisterBank::read(memoryAddress memoryAddressIn ) {
+memoryAddress RegisterBank::readFromRegister(memoryAddress memoryAddressIn ) {
 	if (memoryAddressIn > REGISTER_LENGTH) {
 		cout << "Error: Register read is out of bounds." << endl;
 		return false;

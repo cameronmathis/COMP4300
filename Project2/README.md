@@ -1,8 +1,8 @@
 COMP 4300
 =====================
 Cameron Mathis - clm0081 </br>
-Project 2 </br>
-10/20/20 </br>
+Project 2 - Attempt 2
+11/03/20
 
 
 Overview: 
@@ -69,6 +69,4 @@ This is where the beginning information is provided for the computation.
 #### Thoughts and Issues ####
 ************************************
 
-###### MIPS in general ######
-
-> I ran into a problem where the 32bit integer notation actually flipped the way the characters were stored. As a resut, some special functions had to be built to retrieve strings. 
+> I ran into a problem loading data to memory when simply using my same functions as project1, so a few changes had to be made. 

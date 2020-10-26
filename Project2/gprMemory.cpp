@@ -1,8 +1,8 @@
 /*******
 	COMP 4300
 	Cameron Mathis
-	Project 2
-	10/20/20
+	Project 2 - Attempt 2
+	11/03/20
 	Memory Simulation
 ********/
 
@@ -21,15 +21,12 @@
 
 using namespace std;
 
-/*******
-	Data Structures
-********/
 typedef uint32_t memoryAddress;
 typedef uint32_t instruction;
 
-memoryAddress text_top = 0x00001000;
-memoryAddress data_top = 0x00002000;
-memoryAddress stack_top = 0x00003000;
+memoryAddress textTop = 0x00001000;
+memoryAddress dataTop = 0x00002000;
+memoryAddress stackTop = 0x00003000;
 
 // Kernal data starts at memoryAddress 0, omitted because we don't use it in this simulation
 instruction textSegment[TEXT_LENGTH];
@@ -40,25 +37,25 @@ class Memory {
 	public:
 		Memory();
 		bool loadCode(memoryAddress memoryAddressIn);					
-    	bool loadString(memoryAddress memoryAddressIn, char stringToBeStored[]);				
-    	memoryAddress * read(memoryAddress memoryAddressIn);
+    	bool loadData(memoryAddress memoryAddressIn, char stringToBeStored[]);				
+    	memoryAddress * readFromMemory(memoryAddress memoryAddressIn);
     	string read_string(memoryAddress memoryAddress);					
     	memoryAddress read_byte(memoryAddress memoryAddressIn, int byte);		
 	private:
-		int decode_address_bin(memoryAddress memoryAddressIn);				
-		int decode_address_index(memoryAddress memoryAddressIn);	
+		int decodeAddressBin(memoryAddress memoryAddressIn);				
+		int decodeAddressIndex(memoryAddress memoryAddressIn);	
 		// Internal counter for textSegment		
 		int textNextOpenMemoryLocation;								
 		int length_of_string(memoryAddress memoryAddressIn, int max_length);
-		memoryAddress mem_byte(instruction data_in,int byte_number);			
-		memoryAddress mem_byte_string(instruction data_in,int byte_number);  
+		memoryAddress mem_byte(instruction data_in, int byte_number);			
+		memoryAddress mem_byte_string(instruction data_in, int byte_number);  
 };
 
 /*******
 	Class Definition 
 ********/
 
-// Initialize memory
+/* Initialize memory -- modified from project 1 */
 Memory::Memory() {
 	textNextOpenMemoryLocation = -1;
 	int hexidecimalOne;
@@ -66,12 +63,12 @@ Memory::Memory() {
 	int hexidecimalThree;
 	string lineOne;
 	string lineTwo = "0000000000";
-	char dataArray[41];
-	memset(dataArray, '\0', sizeof(dataArray)/sizeof(dataArray[0]));
+	char dataArray[DATA_LENGTH];
+	memset(dataArray, '\0', sizeof(dataArray) / sizeof(dataArray[0]));
 	int i = 0;
 	ifstream gprFileCode ("palindrome.s");
 	if (gprFileCode.is_open()) {
-		while ( getline (gprFileCode,lineOne)) {
+		while ( getline(gprFileCode, lineOne)) {
 			if (lineOne == "") {
 				continue;
 			}
@@ -95,11 +92,11 @@ Memory::Memory() {
 				// Store lineTwo as hexidecimal
 				sscanf(lineTwo.data(), "%x", &hexidecimalTwo);
 				// Store lineThree as hexidecimal
-				hexidecimalTwo = atoi(lineTwo.c_str());
-				for (int ch = 0; ch < 40; ch++) {
+				hexidecimalTwo = std::stoi(lineTwo.c_str(), 0, 16);
+				for (int ch = 0; ch < DATA_LENGTH - 1; ch++) {
 					dataArray[ch] = lineOne[ch+11];
 				}
-				loadString(hexidecimalTwo, dataArray);
+				loadData(hexidecimalTwo, dataArray);
 			}	
 		}
 	} else {
@@ -121,87 +118,90 @@ bool Memory::loadCode(memoryAddress memoryAddressIn) {
 	}
 }
 
-/* Write the given string to memory */
-bool Memory::loadString(memoryAddress memoryAddressIn, char stringToBeStored[]) {
-	switch(decode_address_bin(memoryAddressIn)) {
-		case 1: { // TEXT  
-			cout << "Error: There was an error loading your string into TEXT segment of memory." << endl;
-			return false;
+/* Write the given data string to memory -- modified from project 1 */
+bool Memory::loadData(memoryAddress memoryAddressIn, char stringToBeStored[]) {
+	if (decodeAddressBin(memoryAddressIn) == 2) {
+		int dataIndex = decodeAddressIndex(memoryAddressIn);
+		// Checks the memory length
+		if (dataIndex < DATA_LENGTH) {
+			// Fill data segment with 0s
+			memset(&dataSegment[dataIndex], 0, strlen(stringToBeStored)+5);
+			// Store string in data segment
+			memcpy(&dataSegment[dataIndex], stringToBeStored,  strlen(stringToBeStored)+1);
+			return true;									
 		}
-		case 2: { // DATA
-			int dataIndex = decode_address_index(memoryAddressIn);
-			// Checks the memory length
-			if (dataIndex < DATA_LENGTH) {
-				memset(&dataSegment[dataIndex], 0, strlen(stringToBeStored)+5);
-				memcpy(&dataSegment[dataIndex], stringToBeStored,  strlen(stringToBeStored)+1);
-				return true;									
-			}
-			return false;
-		}
-		case 3: { // STACK
-			int dataIndex = decode_address_index(memoryAddressIn);
-			if (dataIndex < STACK_LENGTH) {
-				memset(&dataSegment[dataIndex], 0, strlen(stringToBeStored)+5);
-				memcpy(&stackSegment[dataIndex], stringToBeStored,  strlen(stringToBeStored)+1);
-				return true;
-			}
-			return false;
-		}
-		default : {
-			cout << "Error: There was an error loading your string into memory, Bin not selected" << endl;
-			return false;
-		}
+		return false;
 	}
-	cout << "Error: There was an error loading your string into memory" << endl;
+	cout << "There was an error loading your data into memory." << endl;
 	return false;
 }
 
-/* Read the memory at the given memory address */
-memoryAddress * Memory::read(memoryAddress memoryAddressIn) {	
-	memoryAddress memory_copy_bin = memoryAddressIn, memory_copy_index = memoryAddressIn;
-	switch(decode_address_bin(memory_copy_bin)) {
+/* Read the memory at the given memory address -- exact same as project 1 */
+memoryAddress * Memory::readFromMemory(memoryAddress memoryAddressIn) {	
+	memoryAddress memoryCopyBin = memoryAddressIn;
+	memoryAddress memoryCopyIndex = memoryAddressIn;
+	switch(decodeAddressBin(memoryCopyBin)) {
 		case 1: {
-			int memory_index = (int) decode_address_index(memory_copy_index);	
+			int memoryIndex = (int) decodeAddressIndex(memoryCopyIndex);	
 			// Checks text memory length								
-			if (memory_index < TEXT_LENGTH)	{									
-				return &textSegment[memory_index];
+			if (memoryIndex < TEXT_LENGTH)	{									
+				return &textSegment[memoryIndex];
 			}
 		} break;
 		case 2: {
-			int memory_index = (int) decode_address_index(memory_copy_index);
+			int memoryIndex = (int) decodeAddressIndex(memoryCopyIndex);
 			// Checks data memory length
-			if (memory_index < DATA_LENGTH)	{										
-				return &dataSegment[memory_index];									
+			if (memoryIndex < DATA_LENGTH)	{										
+				return &dataSegment[memoryIndex];									
 			}
 		} break;
 		case 3: {
-			int memory_index = (int) decode_address_index(memory_copy_index);
+			int memoryIndex = (int) decodeAddressIndex(memoryCopyIndex);
 			// Checks stack memory length
-			if (memory_index < STACK_LENGTH) {									
-				return &stackSegment[memory_index];									
+			if (memoryIndex < STACK_LENGTH) {									
+				return &stackSegment[memoryIndex];									
 			}
 		} break;
 		default: {
 			// Not in current memory space
 			cout << "Error: Memory read is not within current memory." << endl;
-			return &stack_top;														
+			return &stackTop;														
 		} break;
 	}
 	cout << "Error: Memory read went wrong." << endl;
-	return &stack_top;
+	return &stackTop;
+}
+
+/* Decodes address into bin -- modified from project 1 */
+int Memory::decodeAddressBin(memoryAddress memoryAddressIn) {		
+	// Shifts all bits to the left 	16													
+	memoryAddressIn = memoryAddressIn << 16;
+	// Shifts all bits to the right 28
+	memoryAddressIn = memoryAddressIn >> 28;
+	return memoryAddressIn;
+	// 0 = kernal, 1 = text, 2 = data, 3 = stack, and (-1) = error
+}
+
+/* Decodes address into array index -- modified from project 1 */
+int Memory::decodeAddressIndex(memoryAddress memoryAddressIn) {
+	// Shifts all bits to the left 20														
+	memoryAddressIn = memoryAddressIn << 20;
+	// Shifts all bits to the right 20
+	memoryAddressIn = memoryAddressIn >> 20;
+	return memoryAddressIn;
 }
 
 // Read a string from memory
 // Built for reading strings across memory segments
 // Used in the system call portion of the simulator
 string Memory::read_string(memoryAddress memoryAddress) {	
-	switch(decode_address_bin(memoryAddress)) {
+	switch(decodeAddressBin(memoryAddress)) {
 		case 1: { // TEXT  
 			cout << "Error: There was an error loading your string into TEXT segment of memory." << endl;
 			return "Error";
 		}
 		case 2: { // DATA
-			int dataIndex = decode_address_index(memoryAddress);
+			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *data_out;
 			data_out = (char*) malloc( length_of_string(memoryAddress, 2000));
 			if (dataIndex < DATA_LENGTH) {
@@ -211,7 +211,7 @@ string Memory::read_string(memoryAddress memoryAddress) {
 			return "Error";
 		}
 		case 3: { // STACK
-			int dataIndex = decode_address_index(memoryAddress);
+			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *data_out;
 			data_out = (char*) malloc( length_of_string(memoryAddress, 2000));
 			if (dataIndex < STACK_LENGTH) {
@@ -225,7 +225,7 @@ string Memory::read_string(memoryAddress memoryAddress) {
 			return "Error";
 		}
 	}
-	cout << "Error: There was an error loading your string into memory" << endl;
+	cout << "There was an error loading your string into memory" << endl;
 	return "Error";
 }
 
@@ -233,67 +233,46 @@ string Memory::read_string(memoryAddress memoryAddress) {
 // Used in theload byte portion of the simulator
 memoryAddress Memory::read_byte(memoryAddress memoryAddressIn, int byte) {
 	memoryAddress memory_copy_bin = memoryAddressIn, memory_copy_index = memoryAddressIn;
-	int memory_index = (int) decode_address_index(memory_copy_index);
-	memory_index = (int) floor(memory_index/4.0);	
+	int memoryIndex = (int) decodeAddressIndex(memory_copy_index);
+	memoryIndex = (int) floor(memoryIndex/4.0);	
 	memoryAddress memory_value=0;
-	switch(decode_address_bin(memory_copy_bin)) {
+	switch(decodeAddressBin(memory_copy_bin)) {
 		case 1: {
 			// Checks text memory length			
-			if (memory_index < TEXT_LENGTH) {
-				memory_value= textSegment[memory_index];
+			if (memoryIndex < TEXT_LENGTH) {
+				memory_value= textSegment[memoryIndex];
 			}
 		} break;
 		case 2: {
 			// Checks data memory length
-			if (memory_index < DATA_LENGTH)	{
-				memory_value= dataSegment[memory_index];									
+			if (memoryIndex < DATA_LENGTH)	{
+				memory_value= dataSegment[memoryIndex];									
 			}
 		} break;
 		case 3: {
 			// Checks stack memory length
-			if (memory_index < STACK_LENGTH) {
-				memory_value= stackSegment[memory_index];									
+			if (memoryIndex < STACK_LENGTH) {
+				memory_value= stackSegment[memoryIndex];									
 			}
 		} break;
 		default: {
 			// Not in current memory space
 			cout << "Error: Memory read is not within current memory." << endl;
-			memory_value= stack_top;													
+			memory_value= stackTop;													
 		} break;
 	}
 	return mem_byte_string(memory_value, byte+1);
 }
 
-// Helps decode address into bin
-// Wipes out everything but the bin bits
-int Memory::decode_address_bin(memoryAddress memoryAddressIn) {		
-	// Shifts all bits to the left 	16													
-	memoryAddressIn = memoryAddressIn << 16;
-	// Shifts all bits to the right 28
-	memoryAddressIn = memoryAddressIn >> 28;
-	return memoryAddressIn;
-	// 0 = kernal, 1 = text, 2 = data, 3 = stack, and (-1) = error
-}
-
-// Helps decode address into array index
-// Removes the (potential) op code and bin
-int Memory::decode_address_index(memoryAddress memoryAddressIn) {
-	// Shifts all bits to the left 20														
-	memoryAddressIn = memoryAddressIn << 20;
-	// Shifts all bits to the right 20
-	memoryAddressIn = memoryAddressIn >> 20;
-	return memoryAddressIn;
-}
-
 // Helper to find the end of string in memory
 int Memory::length_of_string(memoryAddress memoryAddressIn, int max_length) {
-	switch(decode_address_bin(memoryAddressIn)) {
+	switch(decodeAddressBin(memoryAddressIn)) {
 		case 1: { // TEXT 
 			cout << "Error: There was an error finding the length of a string in TEXT segment of memory." << endl;
 			return 0;
 		}
 		case 2: { // DATA
-			int dataIndex = decode_address_index(memoryAddressIn);
+			int dataIndex = decodeAddressIndex(memoryAddressIn);
 			// Checks data memory length
 			if (dataIndex < DATA_LENGTH) {
 				bool end_not_found = true;
@@ -311,7 +290,7 @@ int Memory::length_of_string(memoryAddress memoryAddressIn, int max_length) {
 			return 0;
 		}
 		case 3: { // STACK
-			int dataIndex = decode_address_index(memoryAddressIn);
+			int dataIndex = decodeAddressIndex(memoryAddressIn);
 			// Checks data memory length
 			if (dataIndex < STACK_LENGTH) {
 				bool end_not_found = true;
