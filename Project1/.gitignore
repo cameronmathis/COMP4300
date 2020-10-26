@@ -1,3 +1,5 @@
+# VSCode Settings
 .vscode
+# Executable files from VSCode
 accumSim.exe
 stackSim.exe
