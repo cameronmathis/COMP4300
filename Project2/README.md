@@ -13,12 +13,12 @@ I extended my accumulator-based machine into a General Purpose Register (GPR) ma
 The written code evaluates if an entered word is a palindrome. For this program spaces are seen as an ending character. For example:
 
 > Please enter a word: nascar </br>
-> The string is not a palindrome.
+> "The string is not a palindrome."
 
 or
 
 > Please enter a word: racecar </br>
-> The string is a palindrome.
+> "The string is a palindrome."
 
 To run the machine, look below!
 
