@@ -3,7 +3,7 @@
 	Cameron Mathis
 	Project 2
 	10/20/20
-	General Purpose Register Machine Registers Simulation
+	Register Simulation
 ********/
 
 #include <cstdlib>
@@ -16,51 +16,39 @@
 
 using namespace std;
 
-/*******
-	Data Structures
-********/
-typedef uint32_t mem_addr;
+typedef uint32_t memoryAddress;
 
-mem_addr registers[REGISTER_LENGTH];
+memoryAddress registers[REGISTER_LENGTH];
 
-class Register_Bank {
+class RegisterBank {
 	public:
-		Register_Bank();
-    	bool write(mem_addr memory_address_in, mem_addr data);			
-    	mem_addr read(mem_addr memory_address_in);												
+		RegisterBank();
+    	bool write(memoryAddress memoryAddressIn, memoryAddress data);			
+    	memoryAddress read(memoryAddress memoryAddressIn);												
 };
 
-/*******
-	Class Definition 
-********/
+RegisterBank::RegisterBank() {}
 
-// Initialize memory
-Register_Bank::Register_Bank() {
-	//empty on purpose
-}
-
-// Writes to a register
-// Used in the add, subtract, and load portions of the simulator
-bool Register_Bank::write(mem_addr memory_address_in, mem_addr data) {
-	if (memory_address_in > REGISTER_LENGTH) {
+/* Writes to register */
+bool RegisterBank::write(memoryAddress memoryAddressIn, memoryAddress data) {
+	if (memoryAddressIn > REGISTER_LENGTH) {
 		cout << "Error: Register write is out of bounds." << endl;
 		return false;
 	} else {
-		registers[memory_address_in] = data;
+		registers[memoryAddressIn] = data;
 		return true;
 	}
 	cout << "Error: Register write went wrong." << endl;
 	return false;
 }
 
-// Reads based on given memory address
-// Used in the add, subtract, branch, and system call portions of the simulator
-mem_addr Register_Bank::read(mem_addr memory_address_in ) {
-	if (memory_address_in > REGISTER_LENGTH) {
+/* Reads from register */
+memoryAddress RegisterBank::read(memoryAddress memoryAddressIn ) {
+	if (memoryAddressIn > REGISTER_LENGTH) {
 		cout << "Error: Register read is out of bounds." << endl;
 		return false;
 	} else {
-		return registers[memory_address_in];
+		return registers[memoryAddressIn];
 	}
 	cout << "Error: Register read went wrong." << endl;
 	return 0;

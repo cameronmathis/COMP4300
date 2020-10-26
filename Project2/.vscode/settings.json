@@ -12,6 +12,8 @@
         "memory_resource": "cpp",
         "istream": "cpp",
         "limits": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "atomic": "cpp",
+        "cstdint": "cpp"
     }
 }
