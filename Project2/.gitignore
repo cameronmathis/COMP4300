@@ -1,2 +1,4 @@
-.vscode
+# VSCode Setting
+.vscode/
+# Executable files from VSCode
 gprSimulator.exe
