@@ -1,0 +1,7 @@
+Instructions Executed (IC): 35
+Cycles Spent in Execution (C): 183
+Instructions Executed (IC): 35
+Cycles Spent in Execution (C): 183
+Instructions Executed (IC): 35
+Instructions Executed (IC): 35
+Cycles Spent in Execution (C): 183

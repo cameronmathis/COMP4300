@@ -6,11 +6,7 @@
 	Register Simulation
 ********/
 
-#include <cstdlib>
-#include <stdio.h>
 #include <iostream>
-#include <fstream>
-#include <string>
 
 #define REGISTER_LENGTH  32
 
@@ -23,33 +19,27 @@ memoryAddress registers[REGISTER_LENGTH];
 class RegisterBank {
 	public:
 		RegisterBank();
-    	bool writeToRegister(memoryAddress memoryAddressIn, memoryAddress data);			
-    	memoryAddress readFromRegister(memoryAddress memoryAddressIn);												
+    	bool writeToRegister(memoryAddress memoryAddressIndex, memoryAddress data);			
+    	memoryAddress readFromRegister(memoryAddress memoryAddressIndex);												
 };
 
 RegisterBank::RegisterBank() {}
 
-/* Writes to register */
-bool RegisterBank::writeToRegister(memoryAddress memoryAddressIn, memoryAddress data) {
-	if (memoryAddressIn > REGISTER_LENGTH) {
-		cout << "Error: Register write is out of bounds." << endl;
-		return false;
-	} else {
-		registers[memoryAddressIn] = data;
+/* Writes to registers */
+bool RegisterBank::writeToRegister(memoryAddress memoryAddressIndex, memoryAddress data) {
+	if (memoryAddressIndex <= REGISTER_LENGTH) {
+		registers[memoryAddressIndex] = data;
 		return true;
 	}
-	cout << "Error: Register write went wrong." << endl;
+	cout << "Error with register write." << endl;
 	return false;
 }
 
-/* Reads from register */
-memoryAddress RegisterBank::readFromRegister(memoryAddress memoryAddressIn ) {
-	if (memoryAddressIn > REGISTER_LENGTH) {
-		cout << "Error: Register read is out of bounds." << endl;
-		return false;
-	} else {
-		return registers[memoryAddressIn];
+/* Reads from registers */
+memoryAddress RegisterBank::readFromRegister(memoryAddress memoryAddressIndex ) {
+	if (memoryAddressIndex <= REGISTER_LENGTH) {
+		return registers[memoryAddressIndex];
 	}
-	cout << "Error: Register read went wrong." << endl;
+	cout << "Error with register read." << endl;
 	return 0;
 }

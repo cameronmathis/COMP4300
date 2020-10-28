@@ -6,9 +6,8 @@
 	General Purpose Register Machine Simulator
 ********/
 
-#include <cstdlib>
-#include <stdio.h>
 #include <iostream>
+#include <iomanip>
 #include "gprMemory.cpp"
 #include "gprRegister.cpp"
 
@@ -20,7 +19,7 @@ class Sim {
 		void run();									
 	private:				
 		void loadNextInstruction();	
-		int instructionOperation();							
+		int getCurrentOperationCode();							
 		int8_t getSignedImmediate(memoryAddress memoryAddr);  			
 		memoryAddress immediateValue();	
 		void addi(int& instructionsExecuted, int& cyclesSpentInExecution);		
@@ -33,6 +32,10 @@ class Sim {
 		void li(int& instructionsExecuted, int& cyclesSpentInExecution);	
 		void subi(int& instructionsExecuted, int& cyclesSpentInExecution);	
 		void syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void printPromptToTXT(string enteredPalindrome);	
+		void printResultToTXT(string result);
+		void printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecution);	
+		void printValuesToTXT(int instructionsExecuted, int cyclesSpentInExecution);	
 		memoryAddress leftBits();					
 		memoryAddress centerBits();					
 		memoryAddress rightBits();		
@@ -48,7 +51,7 @@ class Sim {
 
 int main() {
 	Sim *sim = new Sim();
-	sim->run();
+	sim -> run();
 	return 0;
 }
 
@@ -66,7 +69,7 @@ void Sim::run() {
 	bool isUserMode = true;
 	while(isUserMode) {
 		loadNextInstruction();
-		switch(instructionOperation()) {
+		switch(getCurrentOperationCode()) {
 			// ADDI
 			case 1: { 
 				addi(instructionsExecuted, cyclesSpentInExecution);
@@ -132,7 +135,7 @@ void Sim::loadNextInstruction() {
 }
 
 /* Returns the operation code from current instruction -- modified from project 1 */
-int Sim::instructionOperation() {															
+int Sim::getCurrentOperationCode() {															
 	instruction operationCode;					
 	operationCode = *currentInstruction;
 	operationCode = operationCode >> 24;
@@ -234,7 +237,7 @@ void Sim::lb(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	memoryAddress addressValue = registers -> readFromRegister(centerBits()); 
 	int8_t immediate = getSignedImmediate(rightBits());
 	addressValue += immediate;
-	bool success = registers ->writeToRegister(leftBits() ,memory -> read_byte(addressValue, addressValue%4) );
+	bool success = registers ->writeToRegister(leftBits() ,memory -> readByte(addressValue, addressValue%4) );
 	if (false == success) {
 		cout << "Error with LB: "<< std::dec << leftBits() << endl;
 	}
@@ -242,7 +245,7 @@ void Sim::lb(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	cyclesSpentInExecution += 6;
 }
 
-/* Load address. Detailed syntax: Rdest, Imm */
+/* Load immediate. Detailed syntax: Rdest, Imm */
 void Sim::li(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	bool success = registers -> writeToRegister(leftBits(), centerBits());
 	if (false == success) {
@@ -269,8 +272,10 @@ void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentI
 	instructionsExecuted += 1;
 	cyclesSpentInExecution += 8;
 	switch(registers -> readFromRegister(3)) {
-		case 4:	{ // Print String
-			cout << memory -> read_string(registers -> readFromRegister(1)) << endl;
+		case 4:	{ // Print String from Data
+			string result = memory -> read_string(registers -> readFromRegister(1));
+			cout << result << endl;
+			printResultToTXT(result);
 			break;
 		}
 		case 8:	{ // Read String In
@@ -283,6 +288,7 @@ void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentI
 			}
 			cout << "Please enter a word: ";
 			getline(cin, enteredPalindrome);
+			printPromptToTXT(enteredPalindrome);
 			enteredPalindrome.copy(palindrome, length, 0);
 			int len = strlen(palindrome);
 			palindrome[len] = '\0';
@@ -291,9 +297,8 @@ void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentI
 		}
 		case 10: { // End Program
 			isUserMode = false;
-			cout << "Instructions Executed (IC): " << std::dec << instructionsExecuted << endl;
-			cout << "Cycles Spent in Execution (C): " << std::dec <<  cyclesSpentInExecution << endl;
-			printf("Speed-up ([8*IC]/C): %3.2F \n", (8.0*instructionsExecuted) / cyclesSpentInExecution );
+			printValuesToConsole(instructionsExecuted, cyclesSpentInExecution);
+			printValuesToTXT(instructionsExecuted, cyclesSpentInExecution);
 			break;
 		}
 		default: {
@@ -305,6 +310,42 @@ void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentI
 		}
 	}
 }	
+
+/* Print the prompt to results.txt */
+void Sim::printPromptToTXT(string enteredPalindrome) {
+	std::ofstream resultsFile;
+  	resultsFile.open("results.txt", std::ios_base::app);
+	resultsFile << endl << "##################" << endl << endl;
+	resultsFile << "Please enter a word: " << enteredPalindrome << endl;
+	resultsFile.close();
+}
+
+/* Print the result to results.txt */
+void Sim::printResultToTXT(string result) {
+	std::ofstream resultsFile;
+  	resultsFile.open("results.txt", std::ios_base::app);
+	resultsFile << result << endl;
+	resultsFile.close();
+}
+
+/* Print the values to console */
+void Sim::printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecution) {
+	cout << "Instructions Executed (IC): " << std::dec << instructionsExecuted << endl;
+	cout << "Cycles Spent in Execution (C): " << std::dec <<  cyclesSpentInExecution << endl;
+	cout << "Speed-up ([8*IC]/C): " << std::setprecision(3) << (8.0*instructionsExecuted) / cyclesSpentInExecution;
+	std::cout << std::fixed;
+}
+
+/* Print the values to results.txt */
+void Sim::printValuesToTXT(int instructionsExecuted, int cyclesSpentInExecution) {
+	std::ofstream resultsFile;
+  	resultsFile.open("results.txt", std::ios_base::app);
+	resultsFile << "Instructions Executed (IC): " << std::dec << instructionsExecuted << endl;
+	resultsFile << "Cycles Spent in Execution (C): " << std::dec <<  cyclesSpentInExecution << endl;
+	resultsFile << "Speed-up ([8*IC]/C): " << std::setprecision(3) << (8.0*instructionsExecuted) / cyclesSpentInExecution << endl;
+	std::cout << std::fixed;
+	resultsFile.close();
+}
 
 /* Returns 8 most left bits from current instruction */
 memoryAddress Sim::leftBits() {
