@@ -273,7 +273,7 @@ void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentI
 	cyclesSpentInExecution += 8;
 	switch(registers -> readFromRegister(3)) {
 		case 4:	{ // Print String from Data
-			string result = memory -> read_string(registers -> readFromRegister(1));
+			string result = memory -> readStringFromMemory(registers -> readFromRegister(1));
 			cout << result << endl;
 			printResultToTXT(result);
 			break;
@@ -332,7 +332,7 @@ void Sim::printResultToTXT(string result) {
 void Sim::printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecution) {
 	cout << "Instructions Executed (IC): " << std::dec << instructionsExecuted << endl;
 	cout << "Cycles Spent in Execution (C): " << std::dec <<  cyclesSpentInExecution << endl;
-	cout << "Speed-up ([8*IC]/C): " << std::setprecision(3) << (8.0*instructionsExecuted) / cyclesSpentInExecution;
+	cout << "Speed-up ([8*IC]/C): " << std::setprecision(3) << (8.0*instructionsExecuted) / cyclesSpentInExecution << endl;
 	std::cout << std::fixed;
 }
 

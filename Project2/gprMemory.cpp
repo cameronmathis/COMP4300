@@ -35,7 +35,7 @@ class Memory {
 		bool loadCode(memoryAddress memoryAddressIndex);					
     	bool loadData(memoryAddress memoryAddressIndex, char stringToBeStored[]);				
     	memoryAddress * readFromMemory(memoryAddress memoryAddressIndex);
-    	string read_string(memoryAddress memoryAddress);					
+    	string readStringFromMemory(memoryAddress memoryAddress);					
     	memoryAddress readByte(memoryAddress memoryAddressIndex, int byte);		
 	private:
 		int decodeAddressBin(memoryAddress memoryAddressIndex);				
@@ -187,21 +187,19 @@ int Memory::decodeAddressIndex(memoryAddress memoryAddressIndex) {
 	return memoryAddressIndex;
 }
 
-// Read a string from memory
-// Built for reading strings across memory segments
-// Used in the system call portion of the simulator
-string Memory::read_string(memoryAddress memoryAddress) {	
+/* Read a string from memory */
+string Memory::readStringFromMemory(memoryAddress memoryAddress) {	
 	switch(decodeAddressBin(memoryAddress)) {
 		case 1: { // TEXT  
-			cout << "Error: There was an error loading your string into TEXT segment of memory." << endl;
+			cout << "There was an error loading your string into memory" << endl;
 			return "Error";
 		}
 		case 2: { // DATA
 			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *data_out;
-			data_out = (char*) malloc( length_of_string(memoryAddress, 2000));
+			data_out = (char*) malloc(length_of_string(memoryAddress, 2000));
 			if (dataIndex < DATA_LENGTH) {
-				memcpy(data_out, &dataSegment[dataIndex],  length_of_string(memoryAddress, 2000));
+				memcpy(data_out, &dataSegment[dataIndex], length_of_string(memoryAddress, 2000));
 				return string(data_out);									
 			}
 			return "Error";
@@ -209,15 +207,15 @@ string Memory::read_string(memoryAddress memoryAddress) {
 		case 3: { // STACK
 			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *data_out;
-			data_out = (char*) malloc( length_of_string(memoryAddress, 2000));
+			data_out = (char*) malloc(length_of_string(memoryAddress, 2000));
 			if (dataIndex < STACK_LENGTH) {
-				memcpy(data_out, &stackSegment[dataIndex],  length_of_string(memoryAddress, 2000));
+				memcpy(data_out, &stackSegment[dataIndex], length_of_string(memoryAddress, 2000));
 				return string(data_out);									
 			}
 			return "Error";
 		}
-		default :{
-			cout << "Error: There was an error loading your string into memory, Bin not selected" << endl;
+		default: {
+			cout << "There was an error loading your string into memory" << endl;
 			return "Error";
 		}
 	}
@@ -263,7 +261,7 @@ memoryAddress Memory::readByte(memoryAddress memoryAddressIndex, int byte) {
 int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
 	switch(decodeAddressBin(memoryAddressIndex)) {
 		case 1: { // TEXT 
-			cout << "Error: There was an error finding the length of a string in TEXT segment of memory." << endl;
+			cout << "There was an error finding the length of your string in memory" << endl;
 			return 0;
 		}
 		case 2: { // DATA
@@ -271,10 +269,10 @@ int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
 			// Checks data memory length
 			if (dataIndex < DATA_LENGTH) {
 				bool end_not_found = true;
-				int length =0;
-				memoryAddress current_byte=0;
+				int length = 0;
+				memoryAddress current_byte = 0;
 				while(end_not_found && length < max_length) {
-					current_byte = mem_byte( dataSegment[dataIndex], 1+(length %4));
+					current_byte = mem_byte(dataSegment[dataIndex], 1+(length %4));
 					if(0 == current_byte) {
 						end_not_found = false;
 					}
@@ -289,8 +287,8 @@ int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
 			// Checks data memory length
 			if (dataIndex < STACK_LENGTH) {
 				bool end_not_found = true;
-				int length =0;
-				memoryAddress current_byte =0;
+				int length = 0;
+				memoryAddress current_byte = 0;
 				while(end_not_found && length < max_length) {
 					current_byte = mem_byte(stackSegment[dataIndex], 1+(length %4));
 					if(0 == current_byte) {
@@ -304,11 +302,11 @@ int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
 			return 0;
 		}
 		default: {
-			cout << "Error: There was an error finding the length of your string, Bin not selected" << endl;
+			cout << "There was an error finding the length of your string in memory" << endl;
 			return 0;
 		}
 	}
-	cout << "Error: There was an error finding the length of your string in memory" << endl;
+	cout << "There was an error finding the length of your string in memory" << endl;
 	return 0;
 }
 

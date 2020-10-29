@@ -63,3 +63,43 @@ Please enter a word: camera
 Instructions Executed (IC): 43
 Cycles Spent in Execution (C): 225
 Speed-up ([8*IC]/C): 1.53
+
+##################
+
+Please enter a word: ts
+"The string is not a palindrome."                
+Instructions Executed (IC): 27
+Cycles Spent in Execution (C): 141
+Speed-up ([8*IC]/C): 1.53
+
+##################
+
+Please enter a word: test
+0"àwD
+Instructions Executed (IC): 42
+Cycles Spent in Execution (C): 221
+Speed-up ([8*IC]/C): 1.52
+
+##################
+
+Please enter a word: test
+"The string is not a palindrome."                
+Instructions Executed (IC): 42
+Cycles Spent in Execution (C): 221
+Speed-up ([8*IC]/C): 1.52
+
+##################
+
+Please enter a word: tt
+"“œ¡µ
+Instructions Executed (IC): 27
+Cycles Spent in Execution (C): 141
+Speed-up ([8*IC]/C): 1.53
+
+##################
+
+Please enter a word: tt
+"The string is a palindrome."                    
+Instructions Executed (IC): 31
+Cycles Spent in Execution (C): 162
+Speed-up ([8*IC]/C): 1.53
