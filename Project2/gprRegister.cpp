@@ -12,23 +12,23 @@
 
 using namespace std;
 
-typedef uint32_t memoryAddress;
+typedef uint32_t registerAddress;
 
-memoryAddress registers[REGISTER_LENGTH];
+registerAddress registers[REGISTER_LENGTH];
 
 class RegisterBank {
 	public:
 		RegisterBank();
-    	bool writeToRegister(memoryAddress memoryAddressIndex, memoryAddress data);			
-    	memoryAddress readFromRegister(memoryAddress memoryAddressIndex);												
+    	bool writeToRegister(registerAddress registerAddressIndex, registerAddress data);			
+    	registerAddress readFromRegister(registerAddress registerAddressIndex);												
 };
 
 RegisterBank::RegisterBank() {}
 
 /* Writes to registers */
-bool RegisterBank::writeToRegister(memoryAddress memoryAddressIndex, memoryAddress data) {
-	if (memoryAddressIndex <= REGISTER_LENGTH) {
-		registers[memoryAddressIndex] = data;
+bool RegisterBank::writeToRegister(registerAddress registerAddressIndex, registerAddress data) {
+	if (registerAddressIndex <= REGISTER_LENGTH) {
+		registers[registerAddressIndex] = data;
 		return true;
 	}
 	cout << "Error with register write." << endl;
@@ -36,9 +36,9 @@ bool RegisterBank::writeToRegister(memoryAddress memoryAddressIndex, memoryAddre
 }
 
 /* Reads from registers */
-memoryAddress RegisterBank::readFromRegister(memoryAddress memoryAddressIndex ) {
-	if (memoryAddressIndex <= REGISTER_LENGTH) {
-		return registers[memoryAddressIndex];
+registerAddress RegisterBank::readFromRegister(registerAddress registerAddressIndex ) {
+	if (registerAddressIndex <= REGISTER_LENGTH) {
+		return registers[registerAddressIndex];
 	}
 	cout << "Error with register read." << endl;
 	return 0;

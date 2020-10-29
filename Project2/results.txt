@@ -47,3 +47,19 @@ Please enter a word: tst
 Instructions Executed (IC): 35
 Cycles Spent in Execution (C): 183
 Speed-up ([8*IC]/C): 1.53
+
+##################
+
+Please enter a word: camerona
+"The string is not a palindrome."                
+Instructions Executed (IC): 51
+Cycles Spent in Execution (C): 267
+Speed-up ([8*IC]/C): 1.53
+
+##################
+
+Please enter a word: camera
+"The string is not a palindrome."                
+Instructions Executed (IC): 43
+Cycles Spent in Execution (C): 225
+Speed-up ([8*IC]/C): 1.53
