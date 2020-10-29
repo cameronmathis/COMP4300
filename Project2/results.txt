@@ -56,3 +56,19 @@ Please enter a word: spencer
 Instructions Executed (IC): 47
 Cycles Spent in Execution (C): 246
 Speed-up ([8*IC]/C): 1.53
+
+##################
+
+Please enter a word: test
+"The string is not a palindrome."                
+Instructions Executed (IC): 42
+Cycles Spent in Execution (C): 221
+Speed-up ([8*IC]/C): 1.52
+
+##################
+
+Please enter a word: camero
+"The string is not a palindrome."                
+Instructions Executed (IC): 43
+Cycles Spent in Execution (C): 225
+Speed-up ([8*IC]/C): 1.53
