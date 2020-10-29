@@ -42,9 +42,9 @@ class Memory {
 		int decodeAddressIndex(memoryAddress memoryAddressIndex);	
 		// Internal counter for textSegment		
 		int textNextOpenMemoryLocation;								
-		int length_of_string(memoryAddress memoryAddressIndex, int max_length);
-		memoryAddress mem_byte(instruction data_in, int byte_number);			
-		memoryAddress mem_byte_string(instruction data_in, int byte_number);  
+		int getLengthOfString(memoryAddress memoryAddressIndex, int maxLength);
+		memoryAddress memoryByte(instruction dataInput, int byteNumber);			
+		memoryAddress memoryByteString(instruction dataInput, int byteNumber);  
 };
 
 /*******
@@ -197,9 +197,9 @@ string Memory::readStringFromMemory(memoryAddress memoryAddress) {
 		case 2: { // DATA
 			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *data_out;
-			data_out = (char*) malloc(length_of_string(memoryAddress, 2000));
+			data_out = (char*) malloc(getLengthOfString(memoryAddress, 2000));
 			if (dataIndex < DATA_LENGTH) {
-				memcpy(data_out, &dataSegment[dataIndex], length_of_string(memoryAddress, 2000));
+				memcpy(data_out, &dataSegment[dataIndex], getLengthOfString(memoryAddress, 2000));
 				return string(data_out);									
 			}
 			return "Error";
@@ -207,9 +207,9 @@ string Memory::readStringFromMemory(memoryAddress memoryAddress) {
 		case 3: { // STACK
 			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *data_out;
-			data_out = (char*) malloc(length_of_string(memoryAddress, 2000));
+			data_out = (char*) malloc(getLengthOfString(memoryAddress, 2000));
 			if (dataIndex < STACK_LENGTH) {
-				memcpy(data_out, &stackSegment[dataIndex], length_of_string(memoryAddress, 2000));
+				memcpy(data_out, &stackSegment[dataIndex], getLengthOfString(memoryAddress, 2000));
 				return string(data_out);									
 			}
 			return "Error";
@@ -254,11 +254,11 @@ memoryAddress Memory::readByte(memoryAddress memoryAddressIndex, int byte) {
 			memoryValue = stackTop;													
 		} break;
 	}
-	return mem_byte_string(memoryValue, byte+1);
+	return memoryByteString(memoryValue, byte+1);
 }
 
-// Helper to find the end of string in memory
-int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
+/* Finds the end of a string in memory */
+int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 	switch(decodeAddressBin(memoryAddressIndex)) {
 		case 1: { // TEXT 
 			cout << "There was an error finding the length of your string in memory" << endl;
@@ -268,13 +268,13 @@ int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
 			int dataIndex = decodeAddressIndex(memoryAddressIndex);
 			// Checks data memory length
 			if (dataIndex < DATA_LENGTH) {
-				bool end_not_found = true;
 				int length = 0;
-				memoryAddress current_byte = 0;
-				while(end_not_found && length < max_length) {
-					current_byte = mem_byte(dataSegment[dataIndex], 1+(length %4));
-					if(0 == current_byte) {
-						end_not_found = false;
+				bool isEndFound = false;
+				memoryAddress currentByte = 0;
+				while(!isEndFound && length < maxLength) {
+					currentByte = memoryByte(dataSegment[dataIndex], 1 + (length%4));
+					if(0 == currentByte) {
+						isEndFound = true;
 					}
 					length++;
 				}
@@ -286,13 +286,13 @@ int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
 			int dataIndex = decodeAddressIndex(memoryAddressIndex);
 			// Checks data memory length
 			if (dataIndex < STACK_LENGTH) {
-				bool end_not_found = true;
 				int length = 0;
-				memoryAddress current_byte = 0;
-				while(end_not_found && length < max_length) {
-					current_byte = mem_byte(stackSegment[dataIndex], 1+(length %4));
-					if(0 == current_byte) {
-						end_not_found = false;
+				bool isEndFound = false;
+				memoryAddress currentByte = 0;
+				while(!isEndFound && length < maxLength) {
+					currentByte = memoryByte(stackSegment[dataIndex], 1 + (length%4));
+					if(0 == currentByte) {
+						isEndFound = true;
 					}
 					length++;
 				}
@@ -310,39 +310,39 @@ int Memory::length_of_string(memoryAddress memoryAddressIndex, int max_length) {
 	return 0;
 }
 
-// Returns a byte inside the instruction
-memoryAddress Memory::mem_byte(instruction data_in, int byte_number) {																					
-	if (byte_number < 5 && byte_number > 0) {
-		byte_number --;
+/* Returns a byte inside the instruction */
+memoryAddress Memory::memoryByte(instruction dataInput, int byteNumber) {																					
+	if (byteNumber < 5 && byteNumber > 0) {
+		byteNumber--;
 		instruction data;
-		data = data_in;
-		data = data << 8*byte_number;
+		data = dataInput;
+		data = data << 8*byteNumber;
 		data = data >> 24;
 		return data;
 	}
-	cout << "Error: Memory byte read" << endl;
+	cout << "Error reading from memory" << endl;
 	return 0;
 } 
 
-// Returns a byte for a string
-memoryAddress Memory::mem_byte_string(instruction data_in, int byte_number) {																					
-	if (byte_number < 5 && byte_number > 0) {
-		byte_number --;
-		switch(byte_number)	{ // Had to be done because of big Indian to little Indian flip
+/* Returns a byte for a string */
+memoryAddress Memory::memoryByteString(instruction dataInput, int byteNumber) {																					
+	if (byteNumber < 5 && byteNumber > 0) {
+		byteNumber--;
+		switch(byteNumber)	{ // Had to be done because of big Indian to little Indian flip
 			case 0: {
-				byte_number =3;
+				byteNumber = 3;
 				break;
 			}
 			case 1: {
-				byte_number =2;
+				byteNumber = 2;
 				break;
 			}
 			case 2: {
-				byte_number =1;
+				byteNumber = 1;
 				break;
 			}
 			case 3: {
-				byte_number =0;
+				byteNumber = 0;
 				break;
 			}
 			default: {
@@ -350,11 +350,11 @@ memoryAddress Memory::mem_byte_string(instruction data_in, int byte_number) {
 			}
 		}
 		instruction data;
-		data = data_in;
-		data = data << 8*byte_number;
+		data = dataInput;
+		data = data << 8*byteNumber;
 		data = data >> 24;
 		return data;
 	}
-	cout << "Error: Memory STRING byte read" << endl;
+	cout << "Error reading byte string from memory" << endl;
 	return 0;
 } 
