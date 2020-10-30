@@ -137,7 +137,8 @@ void Sim::loadNextInstruction() {
 /* Returns the operation code from current instruction -- modified from project 1 */
 int Sim::getCurrentOperationCode() {															
 	instruction operationCode;					
-	operationCode = *currentInstruction;
+	operationCode = *currentInstruction;		
+	// Shifts all bits to the right 24	
 	operationCode = operationCode >> 24;
 	return operationCode;
 }
@@ -146,8 +147,11 @@ int Sim::getCurrentOperationCode() {
 int8_t Sim::getSignedImmediate(memoryAddress memoryAddr) {
 	memoryAddress signBit = memoryAddr;
 	memoryAddress value = memoryAddr;
+	// Shifts all bits to the left 7
 	signBit = signBit >> 7;
-	value = value << 26;
+	// Shifts all bits to the left 26	
+	value = value << 26;		
+	// Shifts all bits to the right 26	
 	value = value >> 26;
 	int result = 0;
 	if (signBit == 1) {
@@ -163,18 +167,20 @@ int8_t Sim::getSignedImmediate(memoryAddress memoryAddr) {
 memoryAddress Sim::immediateValue() {
 	instruction memoryAddress;
 	memoryAddress = *currentInstruction;
-	memoryAddress = memoryAddress << 16;
+	// Shifts all bits to the left 16
+	memoryAddress = memoryAddress << 16;		
+	// Shifts all bits to the right 16	
 	memoryAddress = memoryAddress >> 16;
 	return memoryAddress;
 }
 
-/* Add immediate. Detailed syntax: ADDI Rdest, Rsrc1, Imm */
+/* Add immediate. Detailed syntax: Rdest, Rsrc1, Imm */
 void Sim::addi(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	int8_t immediate = getSignedImmediate(rightBits());
 	uint32_t registerValue = registers -> readFromRegister(centerBits());
 	bool success = registers -> writeToRegister(leftBits(), immediate + registerValue);
 	if (false == success) {
-		cout << "Error with ADDI: "<< std::dec << centerBits() << endl;
+		cout << "Error with ADDI." << endl;
 	}
 	instructionsExecuted += 1;
 	cyclesSpentInExecution += 6;
@@ -226,7 +232,7 @@ void Sim::bne(int& instructionsExecuted, int& cyclesSpentInExecution) {
 void Sim::la(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	bool success = registers -> writeToRegister(leftBits(), immediateValue());
 	if (false == success) {
-		cout << "Error with LA: "<< std::dec << leftBits() << endl;
+		cout << "Error with LA." << endl;
 	}
 	instructionsExecuted += 1;
 	cyclesSpentInExecution += 5;
@@ -239,7 +245,7 @@ void Sim::lb(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	addressValue += immediate;
 	bool success = registers ->writeToRegister(leftBits() ,memory -> readByte(addressValue, addressValue%4) );
 	if (false == success) {
-		cout << "Error with LB: "<< std::dec << leftBits() << endl;
+		cout << "Error with LB." << endl;
 	}
 	instructionsExecuted += 1;
 	cyclesSpentInExecution += 6;
@@ -249,7 +255,7 @@ void Sim::lb(int& instructionsExecuted, int& cyclesSpentInExecution) {
 void Sim::li(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	bool success = registers -> writeToRegister(leftBits(), centerBits());
 	if (false == success) {
-		cout << "Error with LI: "<< std::dec << leftBits() << endl;
+		cout << "Error with LI." << endl;
 	}
 	instructionsExecuted += 1;
 	cyclesSpentInExecution += 3;
@@ -261,7 +267,7 @@ void Sim::subi(int& instructionsExecuted, int& cyclesSpentInExecution) {
 	uint32_t registerValue = registers -> readFromRegister(centerBits());
 	bool success = registers -> writeToRegister(leftBits(), registerValue - immediate);
 	if (false == success) {
-		cout << "Error with SUBI: "<< std::dec << centerBits() << endl;
+		cout << "Error with SUBI." << endl;
 	}
 	instructionsExecuted += 1;
 	cyclesSpentInExecution += 6;
@@ -302,7 +308,7 @@ void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentI
 			break;
 		}
 		default: {
-			cout << "There was an error with SYSCALL." << endl;
+			cout << "Error with SYSCALL." << endl;
 			cout << "Program Counter: " << std::hex << programCounter << endl;
 			cout << "Current Instruction: " << std::hex << currentInstruction << endl;
 			isUserMode = false;
@@ -311,19 +317,19 @@ void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentI
 	}
 }	
 
-/* Print the prompt to results.txt */
+/* Print the prompt to result.txt */
 void Sim::printPromptToTXT(string enteredPalindrome) {
 	std::ofstream resultsFile;
-  	resultsFile.open("results.txt", std::ios_base::app);
+  	resultsFile.open("result.txt", std::ios_base::app);
 	resultsFile << endl << "##################" << endl << endl;
 	resultsFile << "Please enter a word: " << enteredPalindrome << endl;
 	resultsFile.close();
 }
 
-/* Print the result to results.txt */
+/* Print the result to result.txt */
 void Sim::printResultToTXT(string result) {
 	std::ofstream resultsFile;
-  	resultsFile.open("results.txt", std::ios_base::app);
+  	resultsFile.open("result.txt", std::ios_base::app);
 	resultsFile << result << endl;
 	resultsFile.close();
 }
@@ -336,10 +342,10 @@ void Sim::printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecut
 	std::cout << std::fixed;
 }
 
-/* Print the values to results.txt */
+/* Print the values to result.txt */
 void Sim::printValuesToTXT(int instructionsExecuted, int cyclesSpentInExecution) {
 	std::ofstream resultsFile;
-  	resultsFile.open("results.txt", std::ios_base::app);
+  	resultsFile.open("result.txt", std::ios_base::app);
 	resultsFile << "Instructions Executed (IC): " << std::dec << instructionsExecuted << endl;
 	resultsFile << "Cycles Spent in Execution (C): " << std::dec <<  cyclesSpentInExecution << endl;
 	resultsFile << "Speed-up ([8*IC]/C): " << std::setprecision(3) << (8.0*instructionsExecuted) / cyclesSpentInExecution << endl;
@@ -350,8 +356,10 @@ void Sim::printValuesToTXT(int instructionsExecuted, int cyclesSpentInExecution)
 /* Returns 8 most left bits from current instruction */
 memoryAddress Sim::leftBits() {
 	instruction memoryAddress;
-	memoryAddress = *currentInstruction;
-	memoryAddress = memoryAddress << 8;
+	memoryAddress = *currentInstruction;		
+	// Shifts all bits to the left 8	
+	memoryAddress = memoryAddress << 8;		
+	// Shifts all bits to the right 24
 	memoryAddress = memoryAddress >> 24;
 	return memoryAddress;
 }
@@ -359,8 +367,10 @@ memoryAddress Sim::leftBits() {
 /* Returns 8 center bits from current instruction */
 memoryAddress Sim::centerBits() {
 	instruction memoryAddress;
-	memoryAddress = *currentInstruction;
-	memoryAddress = memoryAddress << 16;
+	memoryAddress = *currentInstruction;		
+	// Shifts all bits to the left 16	
+	memoryAddress = memoryAddress << 16;		
+	// Shifts all bits to the right 24	
 	memoryAddress = memoryAddress >> 24;
 	return memoryAddress;
 }
@@ -368,8 +378,10 @@ memoryAddress Sim::centerBits() {
 /* Returns 8 most right bits from current instruction */
 memoryAddress Sim::rightBits() {
 	instruction memoryAddress;
-	memoryAddress = *currentInstruction;
-	memoryAddress = memoryAddress << 24;
+	memoryAddress = *currentInstruction;		
+	// Shifts all bits to the left 24		
+	memoryAddress = memoryAddress << 24;		
+	// Shifts all bits to the right 24	
 	memoryAddress = memoryAddress >> 24;
 	return memoryAddress;
 }

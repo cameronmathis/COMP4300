@@ -24,7 +24,6 @@ memoryAddress textTop = 0x00001000;
 memoryAddress dataTop = 0x00002000;
 memoryAddress stackTop = 0x00003000;
 
-// Kernal data starts at memoryAddress 0, omitted because we don't use it in this simulation
 instruction textSegment[TEXT_LENGTH];
 memoryAddress dataSegment[DATA_LENGTH];
 memoryAddress stackSegment[STACK_LENGTH];
@@ -40,10 +39,10 @@ class Memory {
 	private:
 		int decodeAddressBin(memoryAddress memoryAddressIndex);				
 		int decodeAddressIndex(memoryAddress memoryAddressIndex);	
-		// Internal counter for textSegment		
+		// Counter for textSegment		
 		int textNextOpenMemoryLocation;								
 		int getLengthOfString(memoryAddress memoryAddressIndex, int maxLength);
-		memoryAddress memoryByte(instruction dataInput, int byteNumber);			
+		memoryAddress getMemoryByte(instruction dataInput, int byteNumber);			
 		memoryAddress memoryByteString(instruction dataInput, int byteNumber);  
 };
 
@@ -84,8 +83,7 @@ Memory::Memory() {
 			if (i == 1) {	
 				for (int ch = 0; ch < 10; ch++) {
 					lineTwo[ch] = lineOne[ch];
-				}
-				// Store lineTwo as hexidecimal
+				} // Store lineTwo as hexidecimal
 				sscanf(lineTwo.data(), "%x", &hexidecimalTwo);
 				// Store lineThree as hexidecimal
 				hexidecimalTwo = std::stoi(lineTwo.c_str(), 0, 16);
@@ -159,7 +157,6 @@ memoryAddress * Memory::readFromMemory(memoryAddress memoryAddressIndex) {
 			}
 		} break;
 		default: {
-			// Not in current memory space
 			cout << "Error: Memory read is not within current memory." << endl;
 			return &stackTop;														
 		} break;
@@ -170,7 +167,7 @@ memoryAddress * Memory::readFromMemory(memoryAddress memoryAddressIndex) {
 
 /* Decodes address into bin -- modified from project 1 */
 int Memory::decodeAddressBin(memoryAddress memoryAddressIndex) {		
-	// Shifts all bits to the left 	16													
+	// Shifts all bits to the left	16													
 	memoryAddressIndex = memoryAddressIndex << 16;
 	// Shifts all bits to the right 28
 	memoryAddressIndex = memoryAddressIndex >> 28;
@@ -196,21 +193,21 @@ string Memory::readStringFromMemory(memoryAddress memoryAddress) {
 		}
 		case 2: { // DATA
 			int dataIndex = decodeAddressIndex(memoryAddress);
-			char *dataOutout;
-			dataOutout = (char*) malloc(getLengthOfString(memoryAddress, 2000));
+			char *dataOutput;
+			dataOutput = (char*) malloc(getLengthOfString(memoryAddress, 2000));
 			if (dataIndex < DATA_LENGTH) {
-				memcpy(dataOutout, &dataSegment[dataIndex], getLengthOfString(memoryAddress, 2000));
-				return string(dataOutout);									
+				memcpy(dataOutput, &dataSegment[dataIndex], getLengthOfString(memoryAddress, 2000));
+				return string(dataOutput);									
 			}
 			return "Error";
 		}
 		case 3: { // STACK
 			int dataIndex = decodeAddressIndex(memoryAddress);
-			char *dataOutout;
-			dataOutout = (char*) malloc(getLengthOfString(memoryAddress, 2000));
+			char *dataOutput;
+			dataOutput = (char*) malloc(getLengthOfString(memoryAddress, 2000));
 			if (dataIndex < STACK_LENGTH) {
-				memcpy(dataOutout, &stackSegment[dataIndex], getLengthOfString(memoryAddress, 2000));
-				return string(dataOutout);									
+				memcpy(dataOutput, &stackSegment[dataIndex], getLengthOfString(memoryAddress, 2000));
+				return string(dataOutput);									
 			}
 			return "Error";
 		}
@@ -230,31 +227,27 @@ memoryAddress Memory::readByte(memoryAddress memoryAddressIndex, int byte) {
 	int memoryIndex = (int) floor(decodeAddressIndex(memoryCopyIndex) / 4.0);
 	memoryAddress memoryValue = 0;
 	switch(decodeAddressBin(memoryCopyBin)) {
-		case 1: {
-			// Checks text memory length			
+		case 1: { // Checks text memory length			
 			if (memoryIndex < TEXT_LENGTH) {
 				memoryValue = textSegment[memoryIndex];
 			}
 		} break;
-		case 2: {
-			// Checks data memory length
+		case 2: { // Checks data memory length
 			if (memoryIndex < DATA_LENGTH)	{
 				memoryValue = dataSegment[memoryIndex];									
 			}
 		} break;
-		case 3: {
-			// Checks stack memory length
+		case 3: { // Checks stack memory length
 			if (memoryIndex < STACK_LENGTH) {
 				memoryValue = stackSegment[memoryIndex];									
 			}
 		} break;
 		default: {
-			// Not in current memory space
 			cout << "Error: Memory read is not within current memory." << endl;
 			memoryValue = stackTop;													
 		} break;
 	}
-	return memoryByteString(memoryValue, byte+1);
+	return memoryByteString(memoryValue, byte + 1);
 }
 
 /* Finds the end of a string in memory */
@@ -272,7 +265,7 @@ int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 				bool isEndFound = false;
 				memoryAddress currentByte = 0;
 				while(!isEndFound && length < maxLength) {
-					currentByte = memoryByte(dataSegment[dataIndex], 1 + (length%4));
+					currentByte = getMemoryByte(dataSegment[dataIndex], 1 + (length%4));
 					if(0 == currentByte) {
 						isEndFound = true;
 					}
@@ -284,20 +277,19 @@ int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 		}
 		case 3: { // STACK
 			int dataIndex = decodeAddressIndex(memoryAddressIndex);
-			// Checks data memory length
+			// Checks stack memory length
 			if (dataIndex < STACK_LENGTH) {
 				int length = 0;
 				bool isEndFound = false;
 				memoryAddress currentByte = 0;
 				while(!isEndFound && length < maxLength) {
-					currentByte = memoryByte(stackSegment[dataIndex], 1 + (length%4));
+					currentByte = getMemoryByte(stackSegment[dataIndex], 1 + (length%4));
 					if(0 == currentByte) {
 						isEndFound = true;
 					}
 					length++;
 				}
 				return length--;
-				
 			}
 			return 0;
 		}
@@ -311,7 +303,7 @@ int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 }
 
 /* Returns a byte inside the instruction */
-memoryAddress Memory::memoryByte(instruction dataInput, int byteNumber) {																					
+memoryAddress Memory::getMemoryByte(instruction dataInput, int byteNumber) {																					
 	if (byteNumber < 5 && byteNumber > 0) {
 		byteNumber--;
 		instruction data;
