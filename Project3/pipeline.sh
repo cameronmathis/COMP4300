@@ -2,21 +2,21 @@
 #---------------------------------
 # COMP 4300
 # Cameron Mathis
-# Project 2
-# 10/20/20
+# Project 3
+# 11/29/20
 # General Purpose Register Machine
 #---------------------------------
 case $1 in
 	compile)
-		g++ gprSim.cpp -std=c++11 -o gprSimulator.out
-		g++ -c gprMem.cpp -std=c++11 -o gprMemory.out
-		g++ -c gprReg.cpp -std=c++11 -o gprRegister.out
+		g++ pipeSim.cpp -std=c++11 -o plSimulator.out
+		g++ -c plMemory.cpp -std=c++11 -o plMemory.out
+		g++ -c plRegister.cpp -std=c++11 -o plRegister.out
 		;;
 	run)
-		./gprSimulator.out
+		./plSimulator.out
 		;;
 	clean)
-		rm gprSimulator.out gprMemory.out gprRegister.out
+		rm plSimulator.out plMemory.out plRegister.out
 		;;
 	*)
 		echo command invalid or missing

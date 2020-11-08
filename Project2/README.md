@@ -1,8 +1,8 @@
 COMP 4300
 =====================
 Cameron Mathis - clm0081 </br>
-Project 2 - Attempt 2 </br>
-11/03/20
+Project 2 </br>
+10/20/20 </br>
 
 
 Overview: 
@@ -13,12 +13,12 @@ I extended my accumulator-based machine into a General Purpose Register (GPR) ma
 The written code evaluates if an entered word is a palindrome. For this program spaces are seen as an ending character. For example:
 
 > Please enter a word: nascar </br>
-> "The string is not a palindrome."
+> The string is not a palindrome.
 
 or
 
 > Please enter a word: racecar </br>
-> "The string is a palindrome."
+> The string is a palindrome.
 
 To run the machine, look below!
 
@@ -69,4 +69,6 @@ This is where the beginning information is provided for the computation.
 #### Thoughts and Issues ####
 ************************************
 
-> I ran into a problem loading data to memory when simply using my same functions as project1, so a few changes had to be made. 
+###### MIPS in general ######
+
+> I ran into a problem where the 32bit integer notation actually flipped the way the characters were stored. As a resut, some special functions had to be built to retrieve strings. 
