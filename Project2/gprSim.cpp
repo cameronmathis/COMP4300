@@ -1,16 +1,15 @@
 /*******
 	COMP 4300
 	Cameron Mathis
-	Project 2
-	10/20/20
-	General Purpose Register Machine Simulation
+	Project 2 - Attempt 2
+	11/03/20
+	General Purpose Register Machine Simulator
 ********/
 
-#include <cstdlib>
-#include <stdio.h>
 #include <iostream>
-#include "gprMem.cpp"
-#include "gprReg.cpp"
+#include <iomanip>
+#include "gprMemory.cpp"
+#include "gprRegister.cpp"
 
 using namespace std;
 
@@ -18,263 +17,371 @@ class Sim {
 	public:
 		Sim();										
 		void run();									
-	private:
-		int instruction_op();						
-		mem_addr first_register();					
-		mem_addr second_register();					
-		mem_addr third_register();					
-		mem_addr immediate_value();					
-		void load_next_instruction();		
+	private:				
+		void loadNextInstruction();	
+		int getCurrentOperationCode();							
+		int8_t getSignedImmediate(memoryAddress memoryAddr);  			
+		memoryAddress immediateValue();	
+		void addi(int& instructionsExecuted, int& cyclesSpentInExecution);		
+		void b(int& instructionsExecuted, int& cyclesSpentInExecution);		
+		void beqz(int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void bge(int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void bne(int& instructionsExecuted, int& cyclesSpentInExecution);
+		void la(int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void lb(int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void li(int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void subi(int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentInExecution);	
+		void printPromptToTXT(string enteredPalindrome);	
+		void printResultToTXT(string result);
+		void printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecution);	
+		void printValuesToTXT(int instructionsExecuted, int cyclesSpentInExecution);	
+		memoryAddress leftBits();					
+		memoryAddress centerBits();					
+		memoryAddress rightBits();		
 		// Program counter		
-		mem_addr pc;								
-		// Pointer to the current instruction
-		instruction *current_instruction;			
+		memoryAddress programCounter;				
 		// Memory object
-		Memory *mem;								
+		Memory *memory;								
 		// CPU internal registers
-		Register_Bank *registers;					
-		int8_t signed_immediate(mem_addr m_addr);  
+		RegisterBank *registers;							
+		// Current instruction
+		instruction *currentInstruction;
 };
 
 int main() {
 	Sim *sim = new Sim();
-	sim->run();
+	sim -> run();
 	return 0;
 }
 
-// Starts state of simulator and initializes memory
+/* Initializes the simulator -- modified from project 1 */
 Sim::Sim() {
-	pc = text_top;
-	mem = new Memory();
-	registers = new Register_Bank();
+	registers = new RegisterBank();
+	programCounter = textTop;
+	memory = new Memory();
 }
 
-// This is the simulation
+/* Runs the simulator -- modified heavily from project 1 */
 void Sim::run() {
-	bool more_instructions = true;
-	int total_instructions_executed = 0;
-	int total_cycles_spent = 0;
-	while(more_instructions) {
-		load_next_instruction();
-		switch(instruction_op()) {
-			case 1: { // ADDI: ADD IMMEDIATE 
-				int8_t immediate = signed_immediate(third_register());
-				uint32_t register_value = registers->read(second_register());
-				bool success = registers->write(first_register(), immediate + register_value);
-				if (false == success) {
-					cout << "Error: Adding value to register: "<< std::dec << second_register() << endl;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 6;
+	int instructionsExecuted = 0;
+	int cyclesSpentInExecution = 0;
+	bool isUserMode = true;
+	while(isUserMode) {
+		loadNextInstruction();
+		switch(getCurrentOperationCode()) {
+			// ADDI
+			case 1: { 
+				addi(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 2: { // B: BRANCH
-				int8_t label_offset =0;
-				label_offset = signed_immediate(third_register());
-				pc += label_offset;
-				
-				total_instructions_executed += 1;
-				total_cycles_spent += 4;
+			// B
+			case 2: { 
+				b(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 3: { // BEQZ: BRACH IF EQUAL TO ZERO
-				int8_t label_offset =0;
-				if (registers->read(first_register()) == 0) {
-					label_offset = signed_immediate(third_register());
-					pc += label_offset;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+			// BEQZ
+			case 3: { 
+				beqz(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 4: { // BGE: BRANCH IF GREATER OR EQUAL
-				int8_t label_offset =0;
-				if ( registers->read(first_register())  >=  registers->read(second_register())) {
-					label_offset = signed_immediate(third_register());
-					pc += label_offset;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+			// BGE
+			case 4: { 
+				bge(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 5: { // BNE: BRANCH IF NOT EQUAL
-				int8_t label_offset =0;
-				if ( registers->read(first_register())  !=  registers->read(second_register())) {
-					label_offset = signed_immediate(third_register());
-					pc += label_offset;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+			// BNE
+			case 5: { 
+				bne(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 6: { // LA: LOAD ADDRESS
-				bool success = registers->write(first_register(),immediate_value());
-				if (false == success) {
-					cout << "Error: Loading Address to register: "<< std::dec << first_register() << endl;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 5;
+			// LA
+			case 6: { 
+				la(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 7: { // LB: LOAD BYTE
-				// number of bytes
-				mem_addr address_value = registers->read(second_register()); 
-				int8_t immediate = signed_immediate(third_register());
-				address_value += immediate;
-				bool success = registers->write(first_register(),mem->read_byte(address_value, address_value%4) );
-				if (false == success) {
-					cout << "Error: Loading Byte into register: "<< std::dec << first_register() << endl;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 6;
+			// LB
+			case 7: { 
+				lb(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 8: { // LI: LOAD IMMEDIATE
-				bool success = registers->write(first_register(), second_register());
-				if (false == success) {
-					cout << "Error: Loading Immediate value to register: "<< std::dec << first_register() << endl;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 3;
+			// LI
+			case 8: { 
+				li(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 9: { // SUBI: SUBTRACT IMMEDIATE
-				int8_t immediate = signed_immediate(third_register());
-				uint32_t register_value = registers->read(second_register());
-				bool success = registers->write(first_register(), register_value - immediate);
-				if (false == success) {
-					cout << "Error: Adding value to register: "<< std::dec << second_register() << endl;
-				}
-				total_instructions_executed += 1;
-				total_cycles_spent += 6;
+			// SUBI
+			case 9: { 
+				subi(instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
-			case 10: { // SYSCALL
-				total_instructions_executed += 1;
-				total_cycles_spent += 8;
-				switch(registers->read(3)) {
-					case 4:	{ // Print String
-						cout << mem->read_string(registers->read(1)) << endl;
-						break;
-					}
-					case 8:	{ // Read String In
-						char palin[1024];
-						string incoming_palin;
-						int length=1024;
-						// Clear memory
-					    for (int i=0; i<1024; i++) {
-					            palin[i]=0;
-					    }
-						cout << "Please enter a word: ";
-						getline(cin, incoming_palin);
-						incoming_palin.copy(palin,1024,0);
-						int len=strlen(palin);
-						palin[len] = '\0';
-						mem->load_string(registers->read(1),palin);
-						break;
-					}
-					case 10: { // End Program
-						more_instructions = false;
-						cout << endl;
-						cout << "Number of Instructions Executed (IC): " << std::dec<< total_instructions_executed << endl;
-						cout << "Number of Cycles Spent in Execution (C): " <<std::dec<<  total_cycles_spent << endl;
-						printf("Speed-up: %3.2F \n",(8.0*total_instructions_executed) / total_cycles_spent );
-						break;
-					}
-					default: {
-						cout << "Error: There was an error with the execution of SYSCALL." << endl;
-						cout << "PC: " << std::hex << pc << endl;
-						cout << "Current Istruction: " <<std::hex << current_instruction << endl;
-						more_instructions = false;
-						break;
-					}
-				}
-				break;
-			}
-			case 11: { // LOAD
-				cout << "Error: LOAD Instruction not implemented." << endl;
-				break;
-			}
-			case 12: { // STORE
-				cout << "Error: STORE Instruction not implemented." << endl;
+			// SYSCALL
+			case 10: { 
+				syscall(isUserMode, instructionsExecuted, cyclesSpentInExecution);
 				break;
 			}
 			default: {
-				more_instructions = false;
+				isUserMode = false;
 				break;
 			}
 		}
 	}
 }
 
-// Removes the memory address from instruction, bits 32-24
-// Returns the op code of internal current instruction
-int Sim::instruction_op() {															
-	instruction op_value;					
-	op_value = *current_instruction;
-	op_value = op_value >> 24;
-	return op_value;
+/* Loads the next instruction and increments the program counter*/
+void Sim::loadNextInstruction() {															
+	currentInstruction = memory -> readFromMemory(programCounter);
+	programCounter++;
 }
 
-// Left most register slot in instruciton
-// Returns bits 24 - 16
-mem_addr Sim::first_register() {
-	instruction memory_address;
-	memory_address = *current_instruction;
-	memory_address = memory_address << 8;
-	memory_address = memory_address >> 24;
-	return memory_address;
+/* Returns the operation code from current instruction -- modified from project 1 */
+int Sim::getCurrentOperationCode() {															
+	instruction operationCode;					
+	operationCode = *currentInstruction;		
+	// Shifts all bits to the right 24	
+	operationCode = operationCode >> 24;
+	return operationCode;
 }
 
-// Center register slot in instruction
-// Returns bits 16-8
-mem_addr Sim::second_register() {
-	instruction memory_address;
-	memory_address = *current_instruction;
-	memory_address = memory_address << 16;
-	memory_address = memory_address >> 24;
-	return memory_address;
-}
-
-// Right most register slot in instruction
-// Returns bits 8-0
-mem_addr Sim::third_register() {
-	instruction memory_address;
-	memory_address = *current_instruction;
-	memory_address = memory_address << 24;
-	memory_address = memory_address >> 24;
-	return memory_address;
-}
-
-// Gives value of immediate slot
-// Returns bits 16-0
-mem_addr Sim::immediate_value() {
-	instruction memory_address;
-	memory_address = *current_instruction;
-	memory_address = memory_address << 16;
-	memory_address = memory_address >> 16;
-	return memory_address;
-}
-
-// Returns a signed value
-// Helper method for handling immediates and signing them correctly
-int8_t Sim::signed_immediate(mem_addr m_addr) {
-	mem_addr sign_bit = m_addr, value = m_addr;
-	sign_bit = sign_bit >> 7;
-	value = value <<26;
-	value = value >>26;
-	int return_value = 0;
-	if (sign_bit == 1) {
-		return_value = 0 -value;
-		return return_value;
+/* Returns a immediate value with the correct sign value */
+int8_t Sim::getSignedImmediate(memoryAddress memoryAddr) {
+	memoryAddress signBit = memoryAddr;
+	memoryAddress value = memoryAddr;
+	// Shifts all bits to the left 7
+	signBit = signBit >> 7;
+	// Shifts all bits to the left 26	
+	value = value << 26;		
+	// Shifts all bits to the right 26	
+	value = value >> 26;
+	int result = 0;
+	if (signBit == 1) {
+		result = 0 - value;
+		return result;
 	} else {
 		return value;
 	}
 	return 0;
 }
 
-// Takes all the steps to load next instruction
-void Sim::load_next_instruction() {															
-	current_instruction = mem->read(pc);
-	pc++;
+/* Returns 16 most right bits from current instruction */
+memoryAddress Sim::immediateValue() {
+	instruction memoryAddress;
+	memoryAddress = *currentInstruction;
+	// Shifts all bits to the left 16
+	memoryAddress = memoryAddress << 16;		
+	// Shifts all bits to the right 16	
+	memoryAddress = memoryAddress >> 16;
+	return memoryAddress;
+}
+
+/* Add immediate. Detailed syntax: Rdest, Rsrc1, Imm */
+void Sim::addi(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	int8_t immediate = getSignedImmediate(rightBits());
+	uint32_t registerValue = registers -> readFromRegister(centerBits());
+	bool success = registers -> writeToRegister(leftBits(), immediate + registerValue);
+	if (false == success) {
+		cout << "Error with ADDI." << endl;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 6;
+}
+
+/* Branch. Detailed syntax: label */
+void Sim::b(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	int8_t labelOffset =0;
+	labelOffset = getSignedImmediate(rightBits());
+    programCounter += labelOffset;
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 4;
+}	
+
+/* Branch if equal to zero. Detailed syntax: Rsrc1, label */
+void Sim::beqz(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	int8_t labelOffset = 0;
+	if (registers -> readFromRegister(leftBits()) == 0) {
+		labelOffset = getSignedImmediate(rightBits());
+		programCounter += labelOffset;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 5;
+}
+
+/* Branch if greater than or equal to. Detailed syntax: Rsrc1, Rsrc2, label */
+void Sim::bge(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	int8_t labelOffset = 0;
+	if (registers -> readFromRegister(leftBits())  >=  registers -> readFromRegister(centerBits())) {
+		labelOffset = getSignedImmediate(rightBits());
+		programCounter += labelOffset;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 5;
+}
+
+/* Branch if not equal to. Detailed syntax: Rsrc1, Rsrc2, label */
+void Sim::bne(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	int8_t labelOffset = 0;
+	if ( registers -> readFromRegister(leftBits())  !=  registers -> readFromRegister(centerBits())) {
+		labelOffset = getSignedImmediate(rightBits());
+		programCounter += labelOffset;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 5;
+}
+
+/* Load address. Detailed syntax: Rdest, label */
+void Sim::la(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	bool success = registers -> writeToRegister(leftBits(), immediateValue());
+	if (false == success) {
+		cout << "Error with LA." << endl;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 5;
+}
+
+/* Load byte. Detailed syntax: Rdest, offset(Rsrc1) */
+void Sim::lb(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	memoryAddress addressValue = registers -> readFromRegister(centerBits()); 
+	int8_t immediate = getSignedImmediate(rightBits());
+	addressValue += immediate;
+	bool success = registers ->writeToRegister(leftBits() ,memory -> readByte(addressValue, addressValue%4) );
+	if (false == success) {
+		cout << "Error with LB." << endl;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 6;
+}
+
+/* Load immediate. Detailed syntax: Rdest, Imm */
+void Sim::li(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	bool success = registers -> writeToRegister(leftBits(), centerBits());
+	if (false == success) {
+		cout << "Error with LI." << endl;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 3;
+}
+
+/* Subtract immediate. Detailed syntax: Rdest, Rsrc1, Imm */
+void Sim::subi(int& instructionsExecuted, int& cyclesSpentInExecution) {
+	int8_t immediate = getSignedImmediate(rightBits());
+	uint32_t registerValue = registers -> readFromRegister(centerBits());
+	bool success = registers -> writeToRegister(leftBits(), registerValue - immediate);
+	if (false == success) {
+		cout << "Error with SUBI." << endl;
+	}
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 6;
+}
+
+/* System call. Used to request a service from the kernel */
+void Sim::syscall(bool& isUserMode, int& instructionsExecuted, int& cyclesSpentInExecution) {
+	instructionsExecuted += 1;
+	cyclesSpentInExecution += 8;
+	switch(registers -> readFromRegister(3)) {
+		case 4:	{ // Print String from Data
+			string result = memory -> readStringFromMemory(registers -> readFromRegister(1));
+			cout << result << endl;
+			printResultToTXT(result);
+			break;
+		}
+		case 8:	{ // Read String In
+			int length = 1024;
+			string enteredPalindrome;
+			char palindrome[length];
+			// Clear memory
+			for (int i = 0; i < length; i++) {
+					palindrome[i] = 0;
+			}
+			cout << "Please enter a word: ";
+			getline(cin, enteredPalindrome);
+			printPromptToTXT(enteredPalindrome);
+			enteredPalindrome.copy(palindrome, length, 0);
+			int len = strlen(palindrome);
+			palindrome[len] = '\0';
+			memory -> loadData(registers -> readFromRegister(1), palindrome);
+			break;
+		}
+		case 10: { // End Program
+			isUserMode = false;
+			printValuesToConsole(instructionsExecuted, cyclesSpentInExecution);
+			printValuesToTXT(instructionsExecuted, cyclesSpentInExecution);
+			break;
+		}
+		default: {
+			cout << "Error with SYSCALL." << endl;
+			cout << "Program Counter: " << std::hex << programCounter << endl;
+			cout << "Current Instruction: " << std::hex << currentInstruction << endl;
+			isUserMode = false;
+			break;
+		}
+	}
+}	
+
+/* Print the prompt to result.txt */
+void Sim::printPromptToTXT(string enteredPalindrome) {
+	std::ofstream resultsFile;
+  	resultsFile.open("result.txt", std::ios_base::app);
+	resultsFile << endl << "##################" << endl << endl;
+	resultsFile << "Please enter a word: " << enteredPalindrome << endl;
+	resultsFile.close();
+}
+
+/* Print the result to result.txt */
+void Sim::printResultToTXT(string result) {
+	std::ofstream resultsFile;
+  	resultsFile.open("result.txt", std::ios_base::app);
+	resultsFile << result << endl;
+	resultsFile.close();
+}
+
+/* Print the values to console */
+void Sim::printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecution) {
+	cout << "Instructions Executed (IC): " << std::dec << instructionsExecuted << endl;
+	cout << "Cycles Spent in Execution (C): " << std::dec <<  cyclesSpentInExecution << endl;
+	cout << "Speed-up ([8*IC]/C): " << std::setprecision(3) << (8.0*instructionsExecuted) / cyclesSpentInExecution << endl;
+	std::cout << std::fixed;
+}
+
+/* Print the values to result.txt */
+void Sim::printValuesToTXT(int instructionsExecuted, int cyclesSpentInExecution) {
+	std::ofstream resultsFile;
+  	resultsFile.open("result.txt", std::ios_base::app);
+	resultsFile << "Instructions Executed (IC): " << std::dec << instructionsExecuted << endl;
+	resultsFile << "Cycles Spent in Execution (C): " << std::dec <<  cyclesSpentInExecution << endl;
+	resultsFile << "Speed-up ([8*IC]/C): " << std::setprecision(3) << (8.0*instructionsExecuted) / cyclesSpentInExecution << endl;
+	std::cout << std::fixed;
+	resultsFile.close();
+}
+
+/* Returns 8 most left bits from current instruction */
+memoryAddress Sim::leftBits() {
+	instruction memoryAddress;
+	memoryAddress = *currentInstruction;		
+	// Shifts all bits to the left 8	
+	memoryAddress = memoryAddress << 8;		
+	// Shifts all bits to the right 24
+	memoryAddress = memoryAddress >> 24;
+	return memoryAddress;
+}
+
+/* Returns 8 center bits from current instruction */
+memoryAddress Sim::centerBits() {
+	instruction memoryAddress;
+	memoryAddress = *currentInstruction;		
+	// Shifts all bits to the left 16	
+	memoryAddress = memoryAddress << 16;		
+	// Shifts all bits to the right 24	
+	memoryAddress = memoryAddress >> 24;
+	return memoryAddress;
+}
+
+/* Returns 8 most right bits from current instruction */
+memoryAddress Sim::rightBits() {
+	instruction memoryAddress;
+	memoryAddress = *currentInstruction;		
+	// Shifts all bits to the left 24		
+	memoryAddress = memoryAddress << 24;		
+	// Shifts all bits to the right 24	
+	memoryAddress = memoryAddress >> 24;
+	return memoryAddress;
 }

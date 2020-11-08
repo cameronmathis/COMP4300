@@ -18,7 +18,7 @@ using namespace std;
 void PressAnyKey(void);
 
 struct if_id {
-	instruction *instruction;
+	instruction *instruct;
 };
 
 struct id_ex {
@@ -117,8 +117,8 @@ Sim::Sim()
 	cyclesSpentInExecution = 0;
 	totalNumberOfNoOperations = 0;
 	isUserMode = true;
-	if_id_new.instruction = 0;
-	if_id_old.instruction = 0;
+	if_id_new.instruct = 0;
+	if_id_old.instruct = 0;
 	id_ex id_ex_new = {0, 0, 0, 0, 0, 0, 0, 0};
 	id_ex id_ex_old = {0, 0, 0, 0, 0, 0, 0, 0};
 	ex_mem ex_mem_old = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -149,7 +149,7 @@ Effected buffers:
 */
 void Sim::IF()
 {
-	if_id_new.instruction = memory -> readFromMemory(programCounter);
+	if_id_new.instruct = memory -> readFromMemory(programCounter);
 	programCounter++;
 }
 /*
@@ -159,10 +159,10 @@ Effected buffers:
 void Sim::ID()
 {
 
-	if(if_id_old.instruction != 0 ) //nop
+	if(if_id_old.instruct != 0 ) //nop
 	{
 		//cout << std::hex << *(if_id_old.instruction) << endl;
-		currentInstruction = if_id_old.instruction;
+		currentInstruction = if_id_old.instruct;
 		id_ex_new.op = getCurrentOperationCode();
 		id_ex_new.inst = *currentInstruction;
 	}
@@ -928,12 +928,12 @@ memoryAddress Sim::leftBits() {
 	return memoryAddress;
 }
 
-/* Returns 8 most right bits from current instruction  -- exact same as project 2 */
-memoryAddress Sim::rightBits() {
+/* Returns 8 center bits from current instruction */
+memoryAddress Sim::centerBits() {
 	instruction memoryAddress;
 	memoryAddress = *currentInstruction;		
-	// Shifts all bits to the left 24		
-	memoryAddress = memoryAddress << 24;		
+	// Shifts all bits to the left 16	
+	memoryAddress = memoryAddress << 16;		
 	// Shifts all bits to the right 24	
 	memoryAddress = memoryAddress >> 24;
 	return memoryAddress;

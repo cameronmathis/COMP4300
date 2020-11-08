@@ -1,5 +1,4 @@
 .text
-
 0x08030800
 0x06012020
 0x0802FF00
@@ -29,9 +28,7 @@
 0x08030A00
 0x0A000000
 
-
 .data
-
 0x00002000:"The string is a palindrome."                                    
 0x00002010:"The string is not a palindrome."                                   
 0x00002020:1024                                                                 
