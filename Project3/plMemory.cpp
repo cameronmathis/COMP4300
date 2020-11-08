@@ -61,7 +61,7 @@ Memory::Memory() {
 	char dataArray[DATA_LENGTH];
 	memset(dataArray, '\0', sizeof(dataArray) / sizeof(dataArray[0]));
 	int i = 0;
-	ifstream gprFileCode("palindrome.s");
+	ifstream gprFileCode("lab3b.s");
 	if (gprFileCode.is_open()) {
 		while (getline(gprFileCode, lineOne)) {
 			if (lineOne == "") {

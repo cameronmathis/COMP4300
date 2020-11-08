@@ -1,78 +1,56 @@
 COMP 4300
 =====================
-Cameron Mathis
+Cameron Mathis - clm0081
 Project 3
-10/30/20
+11/29/20
 
 Overview:
 -------------
 
-In this lab we migrated a single cycle MIPS machine to a pipe line MIPS machine.
+In this lab I extended my migrated my multi-cycle machine to a pipe line machine.
 
-With that comes a few complications.
-
-Program
+Pipe Line Machine
 -------------
 
-To run the program:
+In order to compile the pipe line machine, navigate to the project folder and run the command:
+	
+	$ ./pipeline.sh compile
 
-    make
-    ./pipeSimulator.o
+In order to run the pipe line machine, run the command: 
 
-clean up:
+	$ ./pipeline.sh run
 
-    make clean  
+You should see this:
 
-Currently it is defaulted to lab3b to run
+>Please enter a word:
 
-Results
+Type any word and hit enter.
+
+Once you are done simulating the pipe line machine run:
+	
+	$ ./pipeline.sh clean
+
+This will clean up the project folder.
+
+Results:
 -------------
 
-###Lab3a:
-
-Number of Instructions Executed (IC): 68
-Number of Cycles Spent in Execution (C): 263
-Number of NOPs: 196
-Goodbye.
-
-###Lab3b:
-
-Please enter a word: hahahah
-"The string is a palindrome."
-
-Number of Instructions Executed (IC): 65
-Number of Cycles Spent in Execution (C): 124
-Number of NOPs: 60
-Goodbye.
-
-
-Please enter a word: notslsf
-"The string is not a palindrome."
-
-Number of Instructions Executed (IC): 47
-Number of Cycles Spent in Execution (C): 95
-Number of NOPs: 49
-Goodbye.
-
-
-###Lab3c:
-
-Number of Instructions Executed (IC): 12
-Number of Cycles Spent in Execution (C): 16
-Number of NOPs: 5
-Goodbye.
-
+Please enter a word: hahahah <br/>
+"The string is a palindrome." <br/>
+Number of Instructions Executed (IC): 65 <br/>
+Number of Cycles Spent in Execution (C): 124 <br/>
+Number of NOPs: 60 <br/>
 
 Notes
 -------------
 
-#### "..type..Code.txt" Files ####
+#### "lab3c.s" File ####
 
-If you take a look in these, they will have two main sections; ".text" and ".data".
+This file has two main sections; ".text" and ".data".
 
 >".text"
 
-This is where the binary for the code is. Humans read it as addi $t1, $t1, 1 the computer reads it as "0x01323281". Weird huh?
+This is where the binary for the code is.
 
 >".data"
 
@@ -92,6 +70,3 @@ took much more time than expected and is still not 100%. The programs we had to 
 
 The more we thought about being able to run just part of the pipe line, the more we realized we need all of it. We can't just run part of the pipe Line
 and hope that the rest will be taken care of. There is no easy way to simply remove a segment of the pipe line.
-
-
-###### This was hard ######
