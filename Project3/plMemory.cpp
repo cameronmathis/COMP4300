@@ -131,7 +131,7 @@ bool Memory::loadData(memoryAddress memoryAddressIndex, char stringToBeStored[])
 }
 
 /* Read the memory at the given memory address -- exact same as project 1 & 2 */
-memoryAddress * Memory::readFromMemory(memoryAddress memoryAddressIndex) {	
+memoryAddress* Memory::readFromMemory(memoryAddress memoryAddressIndex) {	
 	memoryAddress memoryCopyBin = memoryAddressIndex;
 	memoryAddress memoryCopyIndex = memoryAddressIndex;
 	switch(decodeAddressBin(memoryCopyBin)) {
