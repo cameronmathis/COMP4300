@@ -59,14 +59,14 @@ class Sim {
 		Sim();
 		void run();
 	private:
-		void loadNextInstruction();
+		void loadNextInstruction(memoryAddress& programCounter);
 		int getCurrentOperationCode();
 		int8_t getSignedImmediate(memoryAddress memoryAddr);
 		memoryAddress immediateValue();	
 		void printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecution, int numberOfNoOperations);
 		memoryAddress leftBits();					
 		memoryAddress centerBits();					
-		memoryAddress rightBits();
+		memoryAddress rightBits();	
 		// Memory object							
 		Memory *memory;			
 		// CPU internal registers	
@@ -77,7 +77,7 @@ class Sim {
 		int cyclesSpentInExecution;
 		int numberOfNoOperations;
 		bool isUserMode = true;		
-		instruction* IF(memoryAddress& programCounter);
+		if_id IF(memoryAddress& programCounter);
 		id_ex ID(instruction *if_id_instructionInput, memoryAddress& programCounter);
 		ex_mem EX(id_ex id_ex_input, ex_mem ex_mem_input);
 		mem_wb MEM(ex_mem ex_mem_old);
@@ -102,10 +102,10 @@ Sim::Sim() {
 	cyclesSpentInExecution = 0;
 	numberOfNoOperations = 0;
 	isUserMode = true;
-	ex_mem ex_mem_old = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-	ex_mem ex_mem_new = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-	mem_wb mem_wb_new = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	mem_wb mem_wb_old = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	ex_mem_old = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	ex_mem_new = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	mem_wb_old = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	mem_wb_new = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 }
 
 /* Runs the simulator -- modified heavily from project 2 */
@@ -119,9 +119,9 @@ void Sim::run() {
 	// ex_mem ex_mem_new = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 	// mem_wb mem_wb_old = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	// mem_wb mem_wb_new = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	while (isUserMode) {
+	while(isUserMode) {
 		if_id_old = if_id_new;
-		if_id_new.instruct = IF(programCounter);
+		if_id_new = IF(programCounter);
 		id_ex_old = id_ex_new;
 		id_ex_new = ID(if_id_old.instruct, programCounter);
 		ex_mem_old = ex_mem_new;
@@ -134,8 +134,10 @@ void Sim::run() {
 }
 
 /* Instruction Fetch */
-instruction* Sim::IF(memoryAddress& programCounter) {
-	return memory -> readFromMemory(programCounter++);
+if_id Sim::IF(memoryAddress& programCounter) {
+	instruction *instruct = memory -> readFromMemory(programCounter++);
+	if_id if_id_return = {instruct};
+	return if_id_return;
 }
 
 /* Instruction Decode */
@@ -296,7 +298,7 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 
 /* Instruction Execute */
 ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
-	ex_mem ex_mem_result;
+	ex_mem ex_mem_result = ex_mem_old;
 	//run the instruction
 	ex_mem_result.operationCode = id_ex_input.operationCode;
 	ex_mem_result.instruct = id_ex_input.instruct;
@@ -470,9 +472,10 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 
 /* Memory Access */
 mem_wb Sim::MEM(ex_mem ex_mem_input) {
-	mem_wb mem_wb_result;
-	mem_wb_result.operationCode = ex_mem_input.operationCode;
-	mem_wb_result.instruct = ex_mem_input.instruct;
+	mem_wb mem_wb_result = mem_wb_old;
+	//store or load from Memory
+	mem_wb_result.operationCode = ex_mem_old.operationCode;
+	mem_wb_result.instruct = ex_mem_old.instruct;
 	switch(ex_mem_input.operationCode) {
 		case 0: { // NOP
 			mem_wb_result.immediate = 0;
@@ -502,8 +505,7 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 		case 4: { // BGE
 			break;
 		}
-		case 5: //BNE BRANCH IF NOT EQUAL  $t0,$t1,target, $t0 <> $t1
-		{
+		case 5: { // BNE
 			break;
 		}
 		case 6: { // LA
@@ -549,7 +551,6 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 				case 4:	{ // Print String
 					mem_wb_result.registerOne = ex_mem_input.registerOne;
 					mem_wb_result.valueA = ex_mem_input.valueA;
-					cout << "hi" << endl;
 					string result = memory -> readStringFromMemory(ex_mem_input.valueA);
 					cout << result << endl;
 					break;
@@ -567,9 +568,10 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 					}
 					cout << "Please enter a word: ";
 					getline(cin, enteredPalindrome);
-					enteredPalindrome.copy(palindrome,1024,0);
+					enteredPalindrome.copy(palindrome, 1024, 0);
 					int len = strlen(palindrome);
 					palindrome[len] = '\0';
+					memory -> loadData(ex_mem_old.valueA, palindrome);
 					break;
 				}
 				case 10: { // End program
@@ -710,6 +712,12 @@ void Sim::WB(mem_wb mem_wb_input) {
 			isUserMode = false;
 			break;
 	}
+}
+
+/* Loads the next instruction and increments the program counter -- exact same as project 2 */
+void Sim::loadNextInstruction(memoryAddress& programCounter) {															
+	currentInstruction = memory -> readFromMemory(programCounter);
+	programCounter++;
 }
 
 /* Returns the operation code from current instruction -- modified from project 2 */
