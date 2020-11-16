@@ -2,7 +2,7 @@
 	COMP 4300
 	Cameron Mathis
 	Project 3
-	10/30/20
+	11/29/20
 	Memory Simulation -- exact same as project 2
 ********/
 
@@ -55,7 +55,6 @@ Memory::Memory() {
 	textNextOpenMemoryLocation = -1;
 	int hexidecimalOne;
 	int hexidecimalTwo;
-	int hexidecimalThree;
 	string lineOne;
 	string lineTwo = "0000000000";
 	char dataArray[DATA_LENGTH];
