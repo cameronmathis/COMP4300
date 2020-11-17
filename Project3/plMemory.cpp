@@ -61,7 +61,7 @@ Memory::Memory() {
 	char dataArray[DATA_LENGTH];
 	memset(dataArray, '\0', sizeof(dataArray) / sizeof(dataArray[0]));
 	int i = 0;
-	ifstream gprFileCode("lab3b.s");
+	ifstream gprFileCode("lab3c.s");
 	if (gprFileCode.is_open()) {
 		while (getline(gprFileCode, lineOne)) {
 			lineOne.erase(lineOne.find_last_not_of("\n\r") + 1);

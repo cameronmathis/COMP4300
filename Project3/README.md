@@ -7,16 +7,16 @@ Project 3
 Overview:
 -------------
 
-In this lab I extended my migrated my multi-cycle machine to a pipe line machine.
+In this lab I extended my migrated my multi-cycle machine to a pipeline machine.
 
 Pipe Line Machine
 -------------
 
-In order to compile the pipe line machine, navigate to the project folder and run the command:
+In order to compile the pipeline machine, navigate to the project folder and run the command:
 	
 	$ ./pipeline.sh compile
 
-In order to run the pipe line machine, run the command: 
+In order to run the pipeline machine, run the command: 
 
 	$ ./pipeline.sh run
 
@@ -26,7 +26,7 @@ You should see this:
 
 Type any word and hit enter.
 
-Once you are done simulating the pipe line machine run:
+Once you are done simulating the pipeline machine run:
 	
 	$ ./pipeline.sh clean
 
@@ -35,16 +35,27 @@ This will clean up the project folder.
 Results:
 -------------
 
-Please enter a word: hahahah <br/>
-"The string is a palindrome." <br/>
-Number of Instructions Executed (IC): 65 <br/>
-Number of Cycles Spent in Execution (C): 124 <br/>
-Number of NOPs: 60 <br/>
+lab3a:
+> Instructions Executed (IC): 68 <br/>
+> Cycles Spent in Execution (C): 263 <br/>
+> No Operations (NOPs): 196 <br/>
+
+lab3b:
+> Please enter a word: racecar <br/>
+> "The string is a palindrome." <br/>
+> Instructions Executed (IC): 65 <br/>
+> Cycles Spent in Execution (C): 124 <br/>
+> No Operations (NOPs): 60 <br/>
+
+lab3c:
+> Instructions Executed (IC): 12 <br/>
+> Cycles Spent in Execution (C): 16 <br/>
+> No Operations (NOPs): 5 <br/>
 
 Notes
 -------------
 
-#### "lab3c.s" File ####
+#### "lab3a.s, lab3b.s, and lab3c.s" Files ####
 
 This file has two main sections; ".text" and ".data".
 
@@ -64,11 +75,7 @@ A couple of things:
 
 Firstly, I ran into the same issue I had in Project 1 when reading from a file, even thought I copied my memory file exactly from Project 2 (where it worked). I eventually figured it out.
 
-One, this migration wasn't all that hard, it was just extremely tedious. All of instruction logic had already been written, so it was
-just the simple task of splitting it into the five different pipe line steps. This quickly turned out to be quite confusing.
+Secondly, I quickly learned that it would be extremely hard to implement and test only one part of the pipeline. As a result I had to have some code for each stage written before I could run my simulation.
 
-One of the main issues we had was forwarding logic. Our Machine works fine without any data hazards and a LOT  of NOPs. Adding in the forwarding logic
-took much more time than expected and is still not 100%. The programs we had to run for this project work, but that is about it.
-
-The more we thought about being able to run just part of the pipe line, the more we realized we need all of it. We can't just run part of the pipe Line
-and hope that the rest will be taken care of. There is no easy way to simply remove a segment of the pipe line.
+One of the main issues we had was forwarding logic. Our Machine works fine without any data hazards and a LOT of NOPs. Adding in the forwarding logic
+took much more time than expected and is still not 100%. The programs we had to run for this project works, but that is about it.
