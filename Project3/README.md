@@ -62,6 +62,8 @@ This is where the beginning information is provided for the computation.
 
 A couple of things:
 
+Firstly, I ran into the same issue I had in Project 1 when reading from a file, even thought I copied my memory file exactly from Project 2 (where it worked). I eventually figured it out.
+
 One, this migration wasn't all that hard, it was just extremely tedious. All of instruction logic had already been written, so it was
 just the simple task of splitting it into the five different pipe line steps. This quickly turned out to be quite confusing.
 
