@@ -59,7 +59,6 @@ class Sim {
 		Sim();
 		void run();
 	private:
-		void loadNextInstruction(memoryAddress& programCounter);
 		int getCurrentOperationCode();
 		int8_t getSignedImmediate(memoryAddress memoryAddr);
 		memoryAddress immediateValue();	
@@ -712,12 +711,6 @@ void Sim::WB(mem_wb mem_wb_input) {
 			isUserMode = false;
 			break;
 	}
-}
-
-/* Loads the next instruction and increments the program counter -- exact same as project 2 */
-void Sim::loadNextInstruction(memoryAddress& programCounter) {															
-	currentInstruction = memory -> readFromMemory(programCounter);
-	programCounter++;
 }
 
 /* Returns the operation code from current instruction -- modified from project 2 */

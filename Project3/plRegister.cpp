@@ -21,7 +21,6 @@ public:
 	RegisterBank();
     bool writeToRegister(registerAddress registerAddressIndex, registerAddress data);			
     registerAddress readFromRegister(registerAddress registerAddressIndex);	
-	void print_register();
 };
 
 RegisterBank::RegisterBank() {}
@@ -44,16 +43,4 @@ registerAddress RegisterBank::readFromRegister(registerAddress registerAddressIn
 	}
 	cout << "Error with register read." << endl;
 	return 0;
-}
-
-void RegisterBank::print_register() {
-	int memory_index = 0;
-	cout <<	"==== REGISTERS ======================" << endl;
-	while (memory_index < REGISTER_LENGTH) {
-		if (registers[memory_index] != 0) {
-			cout << memory_index << ":  " << std::dec << registers[memory_index] << endl;
-		}
-		memory_index++;
-	}
-	cout <<	"==========================" << endl;
 }

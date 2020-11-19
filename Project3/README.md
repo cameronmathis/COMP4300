@@ -7,7 +7,7 @@ Project 3
 Overview:
 -------------
 
-In this lab I extended my migrated my multi-cycle machine to a pipeline machine.
+In this project, I changed my multi-cycle machine (from project 2) to a pipeline machine.
 
 Pipe Line Machine
 -------------
@@ -31,6 +31,8 @@ Once you are done simulating the pipeline machine run:
 	$ ./pipeline.sh clean
 
 This will clean up the project folder.
+
+The project is currently set for lab3c.s, but if you would like to run a different partially assembled code (lab3a.s or lab3b.s) then you can change the filename on line 64 of the plMemory.cpp file.
 
 Results:
 -------------
@@ -65,17 +67,17 @@ This is where the binary for the code is.
 
 >".data"
 
-This is where the beginning information is provided for the computation.
+This is where the beginning information is provided for the computation. (only lab2b.s contains a ".data" section)
 
 
 #### Thoughts and Issues ####
 ************************************
 
-A couple of things:
+Thoughts: <br/>
+The implementation of this project was not as hard as I first expected it to be (still not easy) since Dr. Xiao took numerous lectures telling us how to set it all up.
 
+
+Issues: <br/>
 Firstly, I ran into the same issue I had in Project 1 when reading from a file, even thought I copied my memory file exactly from Project 2 (where it worked). I eventually figured it out.
 
 Secondly, I quickly learned that it would be extremely hard to implement and test only one part of the pipeline. As a result I had to have some code for each stage written before I could run my simulation.
-
-One of the main issues we had was forwarding logic. Our Machine works fine without any data hazards and a LOT of NOPs. Adding in the forwarding logic
-took much more time than expected and is still not 100%. The programs we had to run for this project works, but that is about it.

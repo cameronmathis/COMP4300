@@ -3,7 +3,7 @@
 	Cameron Mathis
 	Project 3
 	11/29/20
-	Memory Simulation -- exact same as project 2
+	Memory Simulation -- almost exactly the same as project 2
 ********/
 
 #include <iostream>
@@ -36,7 +36,6 @@ class Memory {
     	memoryAddress * readFromMemory(memoryAddress memoryAddressIndex);
     	string readStringFromMemory(memoryAddress memoryAddress);					
     	memoryAddress readByte(memoryAddress memoryAddressIndex, int byte);		
-		void print_memory();
 	private:
 		int decodeAddressBin(memoryAddress memoryAddressIndex);				
 		int decodeAddressIndex(memoryAddress memoryAddressIndex);	
@@ -51,7 +50,7 @@ class Memory {
 	Class Definition 
 ********/
 
-/* Initialize memory -- modified from project 1 & exact same as project 2 */
+/* Initialize memory -- modified from project 1 & alsmost exactly the same as project 2 */
 Memory::Memory() {
 	textNextOpenMemoryLocation = -1;
 	int hexidecimalOne;
@@ -64,7 +63,7 @@ Memory::Memory() {
 	ifstream gprFileCode("lab3c.s");
 	if (gprFileCode.is_open()) {
 		while (getline(gprFileCode, lineOne)) {
-			lineOne.erase(lineOne.find_last_not_of("\n\r") + 1);
+			lineOne.erase(lineOne.find_last_not_of("\n\r") + 1); // this is the only line different from project 2
 			if (lineOne == "") {
 				continue;
 			}
@@ -351,22 +350,3 @@ memoryAddress Memory::memoryByteString(instruction dataInput, int byteNumber) {
 	cout << "Error reading byte string from memory." << endl;
 	return 0;
 } 
-
-void Memory::print_memory() {
-	//text
-	int memory_index = 0;
-	cout <<	"==== TEXT ======================" << endl;
-	while (memory_index < TEXT_LENGTH) {
-		cout << "  " << std::hex << textSegment[memory_index] << endl;
-		memory_index++;
-	}
-	cout <<	"==========================" << endl;
-	//data
-	memory_index = 0;
-	cout <<	"==== DATA ======================" << endl;
-	while (memory_index < DATA_LENGTH) {
-		cout << memory_index <<":  " << dataSegment[memory_index] << endl;
-		memory_index++;
-	}
-	cout <<	"==========================" << endl;
-}
