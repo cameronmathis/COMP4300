@@ -39,7 +39,7 @@ class Memory {
 	private:
 		int decodeAddressBin(memoryAddress memoryAddressIndex);				
 		int decodeAddressIndex(memoryAddress memoryAddressIndex);	
-		// Counter for textSegment		
+		// counter for textSegment		
 		int textNextOpenMemoryLocation;								
 		int getLengthOfString(memoryAddress memoryAddressIndex, int maxLength);
 		memoryAddress getMemoryByte(instruction dataInput, int byteNumber);			
@@ -74,18 +74,18 @@ Memory::Memory() {
 				i = 1; 
 				continue;
 			}	
-			// Text
-			if (i == 0)	{	// Store lineOne as hexidecimal
+			// .text
+			if (i == 0)	{	// store lineOne as hexidecimal
 				sscanf(lineOne.data(),"%x", &hexidecimalOne);
 				loadCode(hexidecimalOne);
 			}
-			// Data
+			// .data
 			if (i == 1) {	
 				for (int ch = 0; ch < 10; ch++) {
 					lineTwo[ch] = lineOne[ch];
-				} // Store lineTwo as hexidecimal
+				} // store lineTwo as hexidecimal
 				sscanf(lineTwo.data(), "%x", &hexidecimalTwo);
-				// Store lineThree as hexidecimal
+				// store lineThree as hexidecimal
 				hexidecimalTwo = std::stoi(lineTwo.c_str(), 0, 16);
 				for (int ch = 0; ch < DATA_LENGTH - 1; ch++) {
 					dataArray[ch] = lineOne[ch+11];
@@ -102,11 +102,11 @@ Memory::Memory() {
 /* Loads from .text section -- exact same as project 1 & 2 */
 bool Memory::loadCode(memoryAddress memoryAddressIndex) {
 	textNextOpenMemoryLocation++;
-	// Checks memory length										
-	if (textNextOpenMemoryLocation < TEXT_LENGTH) {	// Stores instruction
+	// checks memory length										
+	if (textNextOpenMemoryLocation < TEXT_LENGTH) {	// stores instruction
 		textSegment[textNextOpenMemoryLocation] = memoryAddressIndex;	
 		return true;
-	} else { // No More memory open
+	} else { // no more memory open
 		cout << "Error: Please expand space for Text Memory." << endl;
 		return false;														
 	}
@@ -116,11 +116,11 @@ bool Memory::loadCode(memoryAddress memoryAddressIndex) {
 bool Memory::loadData(memoryAddress memoryAddressIndex, char stringToBeStored[]) {
 	if (decodeAddressBin(memoryAddressIndex) == 2) {
 		int dataIndex = decodeAddressIndex(memoryAddressIndex);
-		// Checks the memory length
+		// checks the memory length
 		if (dataIndex < DATA_LENGTH) {
-			// Fill data segment with 0s
+			// fill data segment with 0s
 			memset(&dataSegment[dataIndex], 0, strlen(stringToBeStored)+5);
-			// Store string in data segment
+			// store string in data segment
 			memcpy(&dataSegment[dataIndex], stringToBeStored,  strlen(stringToBeStored)+1);
 			return true;									
 		}
@@ -137,21 +137,21 @@ memoryAddress* Memory::readFromMemory(memoryAddress memoryAddressIndex) {
 	switch(decodeAddressBin(memoryCopyBin)) {
 		case 1: {
 			int memoryIndex = (int) decodeAddressIndex(memoryCopyIndex);	
-			// Checks text memory length								
+			// checks text memory length								
 			if (memoryIndex < TEXT_LENGTH)	{									
 				return &textSegment[memoryIndex];
 			}
 		} break;
 		case 2: {
 			int memoryIndex = (int) decodeAddressIndex(memoryCopyIndex);
-			// Checks data memory length
+			// checks data memory length
 			if (memoryIndex < DATA_LENGTH)	{										
 				return &dataSegment[memoryIndex];									
 			}
 		} break;
 		case 3: {
 			int memoryIndex = (int) decodeAddressIndex(memoryCopyIndex);
-			// Checks stack memory length
+			// checks stack memory length
 			if (memoryIndex < STACK_LENGTH) {									
 				return &stackSegment[memoryIndex];									
 			}
@@ -167,9 +167,9 @@ memoryAddress* Memory::readFromMemory(memoryAddress memoryAddressIndex) {
 
 /* Decodes address into bin -- modified from project 1 & exact same as project 2 */
 int Memory::decodeAddressBin(memoryAddress memoryAddressIndex) {		
-	// Shifts all bits to the left	16													
+	// shifts all bits to the left	16													
 	memoryAddressIndex = memoryAddressIndex << 16;
-	// Shifts all bits to the right 28
+	// shifts all bits to the right 28
 	memoryAddressIndex = memoryAddressIndex >> 28;
 	return memoryAddressIndex;
 	// 0 = kernal, 1 = text, 2 = data, 3 = stack, and (-1) = error
@@ -177,9 +177,9 @@ int Memory::decodeAddressBin(memoryAddress memoryAddressIndex) {
 
 /* Decodes address into array index -- modified from project 1 & exact same as project 2 */
 int Memory::decodeAddressIndex(memoryAddress memoryAddressIndex) {
-	// Shifts all bits to the left 20														
+	// shifts all bits to the left 20														
 	memoryAddressIndex = memoryAddressIndex << 20;
-	// Shifts all bits to the right 20
+	// shifts all bits to the right 20
 	memoryAddressIndex = memoryAddressIndex >> 20;
 	return memoryAddressIndex;
 }
@@ -187,11 +187,13 @@ int Memory::decodeAddressIndex(memoryAddress memoryAddressIndex) {
 /* Read a string from memory -- exact same as project 2 */
 string Memory::readStringFromMemory(memoryAddress memoryAddress) {	
 	switch(decodeAddressBin(memoryAddress)) {
-		case 1: { // TEXT  
+		// TEXT 
+		case 1: {  
 			cout << "There was an error loading your string into memory." << endl;
 			return "Error";
 		}
-		case 2: { // DATA
+		 // DATA
+		case 2: {
 			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *dataOutput;
 			dataOutput = (char*) malloc(getLengthOfString(memoryAddress, 2000));
@@ -201,7 +203,8 @@ string Memory::readStringFromMemory(memoryAddress memoryAddress) {
 			}
 			return "Error";
 		}
-		case 3: { // STACK
+		// STACK
+		case 3: { 
 			int dataIndex = decodeAddressIndex(memoryAddress);
 			char *dataOutput;
 			dataOutput = (char*) malloc(getLengthOfString(memoryAddress, 2000));
@@ -227,17 +230,17 @@ memoryAddress Memory::readByte(memoryAddress memoryAddressIndex, int byte) {
 	int memoryIndex = (int) floor(decodeAddressIndex(memoryCopyIndex) / 4.0);
 	memoryAddress memoryValue = 0;
 	switch(decodeAddressBin(memoryCopyBin)) {
-		case 1: { // Checks text memory length			
+		case 1: { // checks text memory length			
 			if (memoryIndex < TEXT_LENGTH) {
 				memoryValue = textSegment[memoryIndex];
 			}
 		} break;
-		case 2: { // Checks data memory length
+		case 2: { // checks data memory length
 			if (memoryIndex < DATA_LENGTH)	{
 				memoryValue = dataSegment[memoryIndex];									
 			}
 		} break;
-		case 3: { // Checks stack memory length
+		case 3: { // checks stack memory length
 			if (memoryIndex < STACK_LENGTH) {
 				memoryValue = stackSegment[memoryIndex];									
 			}
@@ -253,13 +256,15 @@ memoryAddress Memory::readByte(memoryAddress memoryAddressIndex, int byte) {
 /* Finds the end of a string in memory -- exact same as project 2 */
 int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 	switch(decodeAddressBin(memoryAddressIndex)) {
-		case 1: { // TEXT 
+		// TEXT 
+		case 1: { 
 			cout << "There was an error finding the length of your string in memory." << endl;
 			return 0;
 		}
-		case 2: { // DATA
+		// DATA
+		case 2: { 
 			int dataIndex = decodeAddressIndex(memoryAddressIndex);
-			// Checks data memory length
+			// checks data memory length
 			if (dataIndex < DATA_LENGTH) {
 				int length = 0;
 				bool isEndFound = false;
@@ -275,9 +280,10 @@ int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 			}
 			return 0;
 		}
-		case 3: { // STACK
+		// STACK
+		case 3: { 
 			int dataIndex = decodeAddressIndex(memoryAddressIndex);
-			// Checks stack memory length
+			// checks stack memory length
 			if (dataIndex < STACK_LENGTH) {
 				int length = 0;
 				bool isEndFound = false;
@@ -320,7 +326,7 @@ memoryAddress Memory::getMemoryByte(instruction dataInput, int byteNumber) {
 memoryAddress Memory::memoryByteString(instruction dataInput, int byteNumber) {																					
 	if (byteNumber < 5 && byteNumber > 0) {
 		byteNumber--;
-		switch(byteNumber)	{ // Had to be done because of big Indian to little Indian flip
+		switch(byteNumber) {
 			case 0: {
 				byteNumber = 3;
 				break;

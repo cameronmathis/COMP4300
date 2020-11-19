@@ -81,3 +81,5 @@ Issues: <br/>
 Firstly, I ran into the same issue I had in Project 1 when reading from a file, even thought I copied my memory file exactly from Project 2 (where it worked). I eventually figured it out.
 
 Secondly, I quickly learned that it would be extremely hard to implement and test only one part of the pipeline. As a result I had to have some code for each stage written before I could run my simulation.
+
+Lastly, when I tried to use the exact layout that Dr. Xiao suggested, I struggled to pass all the variables I need for certain function. As a result, some variables were made global.

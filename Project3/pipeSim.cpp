@@ -2,7 +2,7 @@
 	COMP 4300
 	Cameron Mathis
 	Project 3
-	10/30/20
+	11/29/20
 	PipeLine Simulation
 ********/
 
@@ -58,7 +58,22 @@ class Sim {
 	public:
 		Sim();
 		void run();
-	private:
+	private:	
+		// Current instruction							
+		instruction *currentInstruction;	
+		int instructionsExecuted;
+		int cyclesSpentInExecution;
+		int numberOfNoOperations;
+		bool isUserMode = true;		
+		if_id IF(Memory *memory, memoryAddress& programCounter);
+		id_ex ID(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory);
+		ex_mem EX(id_ex id_ex_input, ex_mem ex_mem_input);
+		mem_wb MEM(ex_mem ex_mem_old, Memory *memory);
+		void WB(mem_wb mem_wb_input, RegisterBank *registers);
+		ex_mem ex_mem_old;
+		ex_mem ex_mem_new;
+		mem_wb mem_wb_old;
+		mem_wb mem_wb_new;
 		int getCurrentOperationCode();
 		int8_t getSignedImmediate(memoryAddress memoryAddr);
 		memoryAddress immediateValue();	
@@ -66,25 +81,6 @@ class Sim {
 		memoryAddress leftBits();					
 		memoryAddress centerBits();					
 		memoryAddress rightBits();	
-		// Memory object							
-		Memory *memory;			
-		// CPU internal registers	
-		RegisterBank *registers;		
-		// Current instruction							
-		instruction *currentInstruction;	
-		int instructionsExecuted;
-		int cyclesSpentInExecution;
-		int numberOfNoOperations;
-		bool isUserMode = true;		
-		if_id IF(memoryAddress& programCounter);
-		id_ex ID(instruction *if_id_instructionInput, memoryAddress& programCounter);
-		ex_mem EX(id_ex id_ex_input, ex_mem ex_mem_input);
-		mem_wb MEM(ex_mem ex_mem_old);
-		void WB(mem_wb mem_wb_input);
-		ex_mem ex_mem_old;
-		ex_mem ex_mem_new;
-		mem_wb mem_wb_old;
-		mem_wb mem_wb_new;
 };
 
 int main() {
@@ -95,8 +91,6 @@ int main() {
 
 /* Initializes the simulator -- modified heavily from project 2 */
 Sim::Sim() {
-	registers = new RegisterBank();
-	memory = new Memory();
 	instructionsExecuted = 0;
 	cyclesSpentInExecution = 0;
 	numberOfNoOperations = 0;
@@ -110,6 +104,8 @@ Sim::Sim() {
 /* Runs the simulator -- modified heavily from project 2 */
 void Sim::run() {	
 	memoryAddress programCounter = textTop;
+	Memory *memory = new Memory();	
+	RegisterBank *registers = new RegisterBank();
 	if_id if_id_old = {0};
 	if_id if_id_new = {0};
 	id_ex id_ex_old = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -120,27 +116,27 @@ void Sim::run() {
 	// mem_wb mem_wb_new = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	while(isUserMode) {
 		if_id_old = if_id_new;
-		if_id_new = IF(programCounter);
+		if_id_new = IF(memory, programCounter);
 		id_ex_old = id_ex_new;
-		id_ex_new = ID(if_id_old.instruct, programCounter);
+		id_ex_new = ID(if_id_old.instruct, programCounter, registers, memory);
 		ex_mem_old = ex_mem_new;
 		ex_mem_new = EX(id_ex_old, ex_mem_old);
 		mem_wb_old = mem_wb_new;
-		mem_wb_new = MEM(ex_mem_old);
-		WB(mem_wb_old);
+		mem_wb_new = MEM(ex_mem_old, memory);
+		WB(mem_wb_old, registers);
 		cyclesSpentInExecution++;
 	}
 }
 
 /* Instruction Fetch */
-if_id Sim::IF(memoryAddress& programCounter) {
+if_id Sim::IF(Memory *memory, memoryAddress& programCounter) {
 	instruction *instruct = memory -> readFromMemory(programCounter++);
 	if_id if_id_return = {instruct};
 	return if_id_return;
 }
 
 /* Instruction Decode */
-id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter) {
+id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory) {
 	id_ex id_ex_result;
 	if(if_id_instructionInput != 0) { // NOP
 		currentInstruction = if_id_instructionInput;
@@ -151,7 +147,8 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 		id_ex_result.instruct = 0;
 	}
 	switch(id_ex_result.operationCode) {
-		case 0: { // NOP
+		// NOP
+		case 0: { 
 			id_ex_result.immediate = 0;
 			id_ex_result.registerOne = 0;
 			id_ex_result.registerTwo = 0;
@@ -160,21 +157,24 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 			id_ex_result.valueB = 0;
 			break;
 		}
-		case 1: { // ADDI
+		// ADDI
+		case 1: { 
 			id_ex_result.immediate = getSignedImmediate(rightBits());
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.valueA = registers -> readFromRegister(centerBits());
 			break;
 		}
-		case 2: { // B
+		// B
+		case 2: { 
 			int8_t labelOffset = 0;
 			labelOffset = getSignedImmediate(rightBits());
 			programCounter--;
 			programCounter += labelOffset;
 			break;
 		}
-		case 3: { // BEQZ
+		// BEQZ
+		case 3: { 
 			int8_t labelOffset = 0;
 			instruction firstRegisterValue = registers -> readFromRegister(leftBits());
 			if (firstRegisterValue == 0) {
@@ -184,7 +184,8 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 			}
 			break;
 		}
-		case 4: { // BGE
+		// BGE
+		case 4: { 
 			instruction firstRegisterValue = registers -> readFromRegister(leftBits());
 			instruction secondRegisterValue = registers -> readFromRegister(centerBits());
 			if (leftBits() == ex_mem_old.registerOne) {
@@ -210,11 +211,12 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 			}
 			break;
 		}
-		case 5: { //BNE
+		// BNE
+		case 5: { 
 			instruction firstRegisterValue = registers -> readFromRegister(leftBits());
 			instruction secondRegisterValue = registers -> readFromRegister(centerBits());
 			if (centerBits() == ex_mem_new.registerOne) {
-				secondRegisterValue = memory -> readByte(ex_mem_new.aluOutput, ex_mem_new.aluOutput%4);
+				secondRegisterValue = memory -> readByte(ex_mem_new.aluOutput, ex_mem_new.aluOutput % 4);
 			}
 			int8_t labelOffset = 0;
 			if (firstRegisterValue  !=  secondRegisterValue) {
@@ -224,32 +226,37 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 			}
 			break;
 		}
-		case 6: { // LA
+		// LA
+		case 6: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.valueA = immediateValue();
 			break;
 		}
-		case 7: { // LB
+		// LB
+		case 7: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.registerTwo = centerBits();
 		 	id_ex_result.immediate = getSignedImmediate(rightBits());
 			id_ex_result.valueA = registers -> readFromRegister(centerBits());
 			break;
 		}
-		case 8: { // LI
+		// LI
+		case 8: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.valueA = centerBits();
 			break;
 		}
-		case 9: { // SUBI
+		// SUBI
+		case 9: { 
 			id_ex_result.immediate = getSignedImmediate(rightBits());
 			id_ex_result.valueA = registers -> readFromRegister(centerBits());
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.registerOne = leftBits();
 			break;
 		}
-		case 10: { // SYSCALL
+		// SYSCALL
+		case 10: { 
 			id_ex_result.registerTwo = 3;
 			id_ex_result.valueB = registers -> readFromRegister(3);
 			switch(id_ex_result.valueB) {
@@ -258,17 +265,20 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 					id_ex_result.valueA = registers -> readFromRegister(1);
 					break;
 				}
-				case 4:	{ // Print String
+				// print string
+				case 4:	{ 
 					id_ex_result.registerOne = 1;
 					id_ex_result.valueA = registers -> readFromRegister(1);
 					break;
 				}
-				case 8:	{ // Read String In
+				// read string in
+				case 8:	{ 
 					id_ex_result.registerOne = 1;
 					id_ex_result.valueA = registers -> readFromRegister(1);
 					break;
 				}
-				case 10: { // End Program
+				// end program
+				case 10: { 
 					break;
 				}
 				default: {
@@ -277,18 +287,16 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 			}
 			break;
 		}
-		case 11: { // LOAD
-			cout << "Load Instruction not implemented." << endl;
+		// LOAD
+		case 11: { 
 			break;
 		}
-		case 12: { // STORE
-			cout << "Store Instruction not implemented." << endl;
+		// STORE
+		case 12: { 
 			break;
 		}
 		default: {
 			cout << "There was an error with the instruction decoding stage." << endl;
-			cout << "PC: " << std::hex << programCounter << endl;
-			cout << "Current Instruction: " << std::hex << *currentInstruction << endl;
 			break;
 		}
 	}
@@ -297,12 +305,13 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 
 /* Instruction Execute */
 ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
-	ex_mem ex_mem_result = ex_mem_old;
-	//run the instruction
+	ex_mem ex_mem_result = ex_mem_input;
+	// run the instruction
 	ex_mem_result.operationCode = id_ex_input.operationCode;
 	ex_mem_result.instruct = id_ex_input.instruct;
 	switch(id_ex_input.operationCode) {
-		case 0: { // NOP
+		// NOP
+		case 0: { 
 			ex_mem_result.immediate = 0;
 			ex_mem_result.registerOne = 0;
 			ex_mem_result.registerTwo = 0;
@@ -312,7 +321,8 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.aluOutput = 0;
 			break;
 		}
-		case 1: { // ADDI
+		// ADDI
+		case 1: { 
 			ex_mem_result.immediate = id_ex_input.immediate;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
 			ex_mem_result.registerOne = id_ex_input.registerOne;
@@ -326,19 +336,24 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.aluOutput = id_ex_input.immediate + id_ex_input.valueA;
 			break;
 		}
-		case 2: { // B BRANCH
+		// B
+		case 2: { 
 			break;
 		}
-		case 3: { // BEQZ
+		// BEQZ
+		case 3: { 
 			break;
 		}
-		case 4: { // BGE
+		// BGE
+		case 4: { 
 			break;
 		}
-		case 5: { // BNE
+		// BNE
+		case 5: { 
 			break;
 		}
-		case 6: { // LA
+		// LA
+		case 6: { 
 			ex_mem_result.registerOne = id_ex_input.registerOne;
 			ex_mem_result.valueA = id_ex_input.valueA;
 			if (id_ex_input.registerTwo == ex_mem_input.registerOne) {
@@ -350,7 +365,8 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.aluOutput = id_ex_input.valueA;
 			break;
 		}
-		case 7: { // LB
+		// LB
+		case 7: { 
 			ex_mem_result.registerOne = id_ex_input.registerOne;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
 			ex_mem_result.immediate = id_ex_input.immediate;
@@ -364,7 +380,8 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.aluOutput = id_ex_input.valueA + id_ex_input.immediate;
 			break;
 		}
-		case 8: { // LI
+		// LI
+		case 8: { 
 			ex_mem_result.registerOne = id_ex_input.registerOne;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
 			ex_mem_result.valueA = id_ex_input.valueA;
@@ -377,7 +394,8 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.aluOutput = id_ex_input.valueA;
 			break;
 		}
-		case 9: { // SUBI
+		// SUBI
+		case 9: { 
 			ex_mem_result.immediate = id_ex_input.immediate;
 			ex_mem_result.valueA = id_ex_input.valueA;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
@@ -391,7 +409,8 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.aluOutput =  id_ex_input.valueA - id_ex_input.immediate;
 			break;
 		}
-		case 10: { // SYSCALL
+		// SYSCALL
+		case 10: { 
 			instruction registerValue = id_ex_input.valueB;
 			if (id_ex_input.registerTwo == ex_mem_input.registerOne) {
 				registerValue = ex_mem_input.aluOutput;
@@ -407,7 +426,8 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 					ex_mem_result.valueA = id_ex_input.valueA;
 					break;
 				}
-				case 4:	{ // Print String
+				// print string
+				case 4:	{ 
 					id_ex_input.registerOne = 1;
 					instruction registValue = id_ex_input.valueA;
 					if (id_ex_input.registerOne == ex_mem_input.registerOne) {
@@ -423,7 +443,8 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 					ex_mem_result.valueA = registValue;
 					break;
 				}
-				case 8:	{ // Read String In
+				// read string in
+				case 8:	{ 
 					id_ex_input.registerOne = 1;
 					instruction registValue = id_ex_input.valueA;
 					if (id_ex_input.registerOne == ex_mem_input.registerOne) {
@@ -439,29 +460,28 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 					ex_mem_result.valueA = registValue;
 					break;
 				}
-				case 10: { // End Program
+				// end program
+				case 10: { 
 					break;
 				}
 				default: {
 					cout << "There was an error with the execute of SYSCALL." << endl;
-					cout << "Current Instruction: " << std::hex << *currentInstruction << endl;
 					isUserMode = false;
 					break;
 				}
 			}
 			break;
 		}
-		case 11: { // LOAD
-			cout << "Load not implemented." << endl;
+		// LOAD
+		case 11: { 
 			break;
 		}
-		case 12: { // STORE
-			cout << "Store not implemented." << endl;
+		// STORE
+		case 12: { 
 			break;
 		}
 		default: {
 			cout << "There was an error with the execute stage." << endl;
-			cout << "Current Instruction: " << std::hex << *currentInstruction << endl;
 			isUserMode = false;
 			break;
 		}
@@ -470,13 +490,14 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 }
 
 /* Memory Access */
-mem_wb Sim::MEM(ex_mem ex_mem_input) {
+mem_wb Sim::MEM(ex_mem ex_mem_input, Memory *memory) {
 	mem_wb mem_wb_result = mem_wb_old;
-	//store or load from Memory
-	mem_wb_result.operationCode = ex_mem_old.operationCode;
-	mem_wb_result.instruct = ex_mem_old.instruct;
+	// store or load from Memory
+	mem_wb_result.operationCode = ex_mem_input.operationCode;
+	mem_wb_result.instruct = ex_mem_input.instruct;
 	switch(ex_mem_input.operationCode) {
-		case 0: { // NOP
+		// NOP
+		case 0: { 
 			mem_wb_result.immediate = 0;
 			mem_wb_result.registerOne = 0;
 			mem_wb_result.registerTwo = 0;
@@ -487,7 +508,8 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 			mem_wb_result.memoryReadOutput = 0;
 			break;
 		}
-		case 1: { // ADDI
+		// ADDI
+		case 1: { 
 			mem_wb_result.immediate = ex_mem_input.immediate;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
@@ -495,25 +517,31 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
 			break;
 		}
-		case 2: { // B
+		// B
+		case 2: { 
 			break;
 		}
-		case 3: { // BEQZ
+		// BEQZ
+		case 3: { 
 			break;
 		}
-		case 4: { // BGE
+		// BGE
+		case 4: { 
 			break;
 		}
-		case 5: { // BNE
+		// BNE
+		case 5: {
 			break;
 		}
-		case 6: { // LA
+		// LA
+		case 6: { 
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.aluOutput = ex_mem_input.valueA;
 			break;
 		}
-		case 7: { // LB
+		// LB
+		case 7: { 
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.immediate = ex_mem_input.immediate;
@@ -522,14 +550,16 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 			mem_wb_result.memoryReadOutput = memory -> readByte(ex_mem_input.aluOutput, ex_mem_input.aluOutput % 4);
 			break;
 		}
-		case 8: { // LI
+		// LI
+		case 8: { 
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
 			break;
 		}
-		case 9: { // SUBI
+		// SUBI
+		case 9: { 
 			mem_wb_result.immediate = ex_mem_input.immediate;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
@@ -537,7 +567,8 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
 			break;
 		}
-		case 10: { // SYSCALL
+		// SYSCALL
+		case 10: { 
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.valueB = ex_mem_input.valueB;
 			switch(ex_mem_input.valueB) {
@@ -547,21 +578,23 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 					}
 					break;
 				}
-				case 4:	{ // Print String
+				// print string
+				case 4:	{ 
 					mem_wb_result.registerOne = ex_mem_input.registerOne;
 					mem_wb_result.valueA = ex_mem_input.valueA;
 					string result = memory -> readStringFromMemory(ex_mem_input.valueA);
 					cout << result << endl;
 					break;
 				}
-				case 8:	{ // Read String In
+				// read string in
+				case 8:	{ 
 					mem_wb_result.registerOne = ex_mem_input.registerOne;
 					mem_wb_result.valueA = ex_mem_input.valueA;
 
 					int length = 1024;
 					string enteredPalindrome;
 					char palindrome[length];
-					// Clear memory
+					// clear memory
 					for (int i = 0; i < length; i++) {
 						palindrome[i] = 0;
 					}
@@ -570,33 +603,32 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 					enteredPalindrome.copy(palindrome, 1024, 0);
 					int len = strlen(palindrome);
 					palindrome[len] = '\0';
-					memory -> loadData(ex_mem_old.valueA, palindrome);
+					memory -> loadData(ex_mem_input.valueA, palindrome);
 					break;
 				}
-				case 10: { // End program
+				// end program
+				case 10: { 
 					break;
 				}
 				default:
 				{
 					cout << "There was an error with the memory access of SYSCALL." << endl;
-					cout << "Current Instruction: " << std::hex << *currentInstruction << endl;
 					isUserMode = false;
 					break;
 				}
 			}
 			break;
 		}
-		case 11: { // LOAD
-			cout << "Load not implemented." << endl;
+		// LOAD
+		case 11: { 
 			break;
 		}
-		case 12: { //STORE
-			cout << "Store not implemented." << endl;
+		// STORE
+		case 12: { 
 			break;
 		}
 		default: {
 			cout << "There was an error with the memory access stage." << endl;
-			cout << "Current Instruction: " << std::hex << *currentInstruction << endl;
 			isUserMode = false;
 			break;
 		}
@@ -605,13 +637,15 @@ mem_wb Sim::MEM(ex_mem ex_mem_input) {
 }
 
 /* Write Back */
-void Sim::WB(mem_wb mem_wb_input) {
+void Sim::WB(mem_wb mem_wb_input, RegisterBank *registers) {
 	switch(mem_wb_input.operationCode) {
-		case 0: { // NOP
+		// NOP
+		case 0: { 
 			numberOfNoOperations++;
 			break;
 		}
-		case 1: { // ADDI
+		// ADDI
+		case 1: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.aluOutput);
 			if (!success) {
 				cout << "Error adding value to register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -619,23 +653,28 @@ void Sim::WB(mem_wb mem_wb_input) {
 			instructionsExecuted++;
 			break;
 		}
-		case 2: { // B
+		// B
+		case 2: { 
 			instructionsExecuted++;
 			break;
 		}
-		case 3: { // BEQZ
+		// BEQZ
+		case 3: { 
 			instructionsExecuted++;
 			break;
 		}
-		case 4: { // BGE
+		// BGE
+		case 4: { 
 			instructionsExecuted++;
 			break;
 		}
-		case 5: { // BNE
+		// BNE
+		case 5: { 
 			instructionsExecuted++;
 			break;
 		}
-		case 6: { // LA
+		// LA
+		case 6: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.valueA);
 			if (!success) {
 				cout << "Error loading address to register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -643,7 +682,8 @@ void Sim::WB(mem_wb mem_wb_input) {
 			instructionsExecuted++;
 			break;
 		}
-		case 7: { // LB
+		// LB
+		case 7: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.memoryReadOutput );
 			if (!success) {
 				cout << "Error loading byte into register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -651,7 +691,8 @@ void Sim::WB(mem_wb mem_wb_input) {
 			instructionsExecuted++;
 			break;
 		}
-		case 8: { // LI
+		// LI
+		case 8: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.registerTwo);
 			if (!success) {
 				cout << "Error loading immediate value to register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -659,7 +700,8 @@ void Sim::WB(mem_wb mem_wb_input) {
 			instructionsExecuted++;
 			break;
 		}
-		case 9: { // SUBI
+		// SUBI
+		case 9: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.aluOutput);
 			if (!success) {
 				cout << "Error subtracting value from register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -667,49 +709,53 @@ void Sim::WB(mem_wb mem_wb_input) {
 			instructionsExecuted++;
 			break;
 		}
-		case 10: { // SYSCALL
+		// SYSCALL
+		case 10: { 
 			switch(mem_wb_input.valueB) {
 				case 1: {
 					instructionsExecuted++;
 					break;
 				}
-				case 4:	{ // Print String
+				// print string
+				case 4:	{ 
 					instructionsExecuted++;
 					break;
 				}
-				case 8:	{ // Read String In
+				 // read string in
+				case 8:	{
 					instructionsExecuted++;
 					break;
 				}
-				case 10: { // End Program
+				// end program
+				case 10: { 
 					instructionsExecuted++;
 					isUserMode = false;
 					printValuesToConsole(instructionsExecuted, cyclesSpentInExecution, numberOfNoOperations);
 					break;
 				}
-				default:
-				{
+				default: {
 					cout << "There was an error with the write back of SYSCALL." << endl;
-					cout << "Current Instruction: " <<std::hex << currentInstruction << endl;
 					isUserMode = false;
 					break;
 				}
 			}
 			break;
 		}
-		case 11: { // LOAD
+		// LOAD
+		case 11: { 
 			cout << "Load not implemented." << endl;
 			break;
 		}
-		case 12: { // STORE
+		// STORE
+		case 12: { 
 			cout << "Store not implemented." << endl;
 			break;
 		}
-		default:
+		default: {
 			cout << "There was an error with the write back stage." << endl;
-			cout << "Current Instruction: " << std::hex << currentInstruction << endl;
 			isUserMode = false;
 			break;
+		}
 	}
 }
 
@@ -720,7 +766,7 @@ int Sim::getCurrentOperationCode() {
 	if (operationCode == 0) {
 		operationCode = 0;
 	} else	{
-		// Shifts all bits to the right 24	
+		// shifts all bits to the right 24	
 		operationCode = operationCode >> 24;
 	}
 	return operationCode;
@@ -730,11 +776,11 @@ int Sim::getCurrentOperationCode() {
 int8_t Sim::getSignedImmediate(memoryAddress memoryAddr) {
 	memoryAddress signBit = memoryAddr;
 	memoryAddress value = memoryAddr;
-	// Shifts all bits to the left 7
+	// shifts all bits to the left 7
 	signBit = signBit >> 7;
-	// Shifts all bits to the left 26	
+	// shifts all bits to the left 26	
 	value = value << 26;		
-	// Shifts all bits to the right 26	
+	// shifts all bits to the right 26	
 	value = value >> 26;
 	int result = 0;
 	if (signBit == 1) {
@@ -750,9 +796,9 @@ int8_t Sim::getSignedImmediate(memoryAddress memoryAddr) {
 memoryAddress Sim::immediateValue() {
 	instruction memoryAddress;
 	memoryAddress = *currentInstruction;
-	// Shifts all bits to the left 16
+	// shifts all bits to the left 16
 	memoryAddress = memoryAddress << 16;		
-	// Shifts all bits to the right 16	
+	// shifts all bits to the right 16	
 	memoryAddress = memoryAddress >> 16;
 	return memoryAddress;
 }
@@ -770,9 +816,9 @@ void Sim::printValuesToConsole(int instructionsExecuted, int cyclesSpentInExecut
 memoryAddress Sim::leftBits() {
 	instruction memoryAddress;
 	memoryAddress = *currentInstruction;		
-	// Shifts all bits to the left 8	
+	// shifts all bits to the left 8	
 	memoryAddress = memoryAddress << 8;		
-	// Shifts all bits to the right 24
+	// shifts all bits to the right 24
 	memoryAddress = memoryAddress >> 24;
 	return memoryAddress;
 }
@@ -781,9 +827,9 @@ memoryAddress Sim::leftBits() {
 memoryAddress Sim::centerBits() {
 	instruction memoryAddress;
 	memoryAddress = *currentInstruction;		
-	// Shifts all bits to the left 16	
+	// shifts all bits to the left 16	
 	memoryAddress = memoryAddress << 16;		
-	// Shifts all bits to the right 24	
+	// shifts all bits to the right 24	
 	memoryAddress = memoryAddress >> 24;
 	return memoryAddress;
 }
@@ -792,9 +838,9 @@ memoryAddress Sim::centerBits() {
 memoryAddress Sim::rightBits() {
 	instruction memoryAddress;
 	memoryAddress = *currentInstruction;		
-	// Shifts all bits to the left 24		
+	// shifts all bits to the left 24		
 	memoryAddress = memoryAddress << 24;		
-	// Shifts all bits to the right 24	
+	// shifts all bits to the right 24	
 	memoryAddress = memoryAddress >> 24;
 	return memoryAddress;
 }
