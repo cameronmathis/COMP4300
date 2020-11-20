@@ -65,11 +65,11 @@ class Sim {
 		int cyclesSpentInExecution;
 		int numberOfNoOperations;
 		bool isUserMode = true;		
-		if_id IF(Memory *memory, memoryAddress& programCounter);
-		id_ex ID(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory);
-		ex_mem EX(id_ex id_ex_input, ex_mem ex_mem_input);
-		mem_wb MEM(ex_mem ex_mem_old, Memory *memory);
-		void WB(mem_wb mem_wb_input, RegisterBank *registers);
+		if_id instructionFetch(Memory *memory, memoryAddress& programCounter);
+		id_ex instructionDecode(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory);
+		ex_mem execute(id_ex id_ex_input, ex_mem ex_mem_input);
+		mem_wb memoryAccess(ex_mem ex_mem_old, Memory *memory);
+		void writeBack(mem_wb mem_wb_input, RegisterBank *registers);
 		ex_mem ex_mem_old;
 		ex_mem ex_mem_new;
 		mem_wb mem_wb_old;
@@ -116,27 +116,25 @@ void Sim::run() {
 	// mem_wb mem_wb_new = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	while(isUserMode) {
 		if_id_old = if_id_new;
-		if_id_new = IF(memory, programCounter);
+		if_id_new = instructionFetch(memory, programCounter);
 		id_ex_old = id_ex_new;
-		id_ex_new = ID(if_id_old.instruct, programCounter, registers, memory);
+		id_ex_new = instructionDecode(if_id_old.instruct, programCounter, registers, memory);
 		ex_mem_old = ex_mem_new;
-		ex_mem_new = EX(id_ex_old, ex_mem_old);
+		ex_mem_new = execute(id_ex_old, ex_mem_old);
 		mem_wb_old = mem_wb_new;
-		mem_wb_new = MEM(ex_mem_old, memory);
-		WB(mem_wb_old, registers);
+		mem_wb_new = memoryAccess(ex_mem_old, memory);
+		writeBack(mem_wb_old, registers);
 		cyclesSpentInExecution++;
 	}
 }
 
-/* Instruction Fetch */
-if_id Sim::IF(Memory *memory, memoryAddress& programCounter) {
+if_id Sim::instructionFetch(Memory *memory, memoryAddress& programCounter) {
 	instruction *instruct = memory -> readFromMemory(programCounter++);
 	if_id if_id_return = {instruct};
 	return if_id_return;
 }
 
-/* Instruction Decode */
-id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory) {
+id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory) {
 	id_ex id_ex_result;
 	if(if_id_instructionInput != 0) { // NOP
 		currentInstruction = if_id_instructionInput;
@@ -303,8 +301,7 @@ id_ex Sim::ID(instruction *if_id_instructionInput, memoryAddress& programCounter
 	return id_ex_result;
 }
 
-/* Instruction Execute */
-ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
+ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 	ex_mem ex_mem_result = ex_mem_input;
 	// run the instruction
 	ex_mem_result.operationCode = id_ex_input.operationCode;
@@ -489,8 +486,7 @@ ex_mem Sim::EX(id_ex id_ex_input, ex_mem ex_mem_input) {
 	return ex_mem_result;
 }
 
-/* Memory Access */
-mem_wb Sim::MEM(ex_mem ex_mem_input, Memory *memory) {
+mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 	mem_wb mem_wb_result = mem_wb_old;
 	// store or load from Memory
 	mem_wb_result.operationCode = ex_mem_input.operationCode;
@@ -636,8 +632,7 @@ mem_wb Sim::MEM(ex_mem ex_mem_input, Memory *memory) {
 	return mem_wb_result;
 }
 
-/* Write Back */
-void Sim::WB(mem_wb mem_wb_input, RegisterBank *registers) {
+void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 	switch(mem_wb_input.operationCode) {
 		// NOP
 		case 0: { 
