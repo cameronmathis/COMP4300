@@ -58,8 +58,7 @@ class Sim {
 	public:
 		Sim();
 		void run();
-	private:	
-		// Current instruction							
+	private:							
 		instruction *currentInstruction;	
 		int instructionsExecuted;
 		int cyclesSpentInExecution;
@@ -128,12 +127,14 @@ void Sim::run() {
 	}
 }
 
+/* Instruction Fetch */
 if_id Sim::instructionFetch(Memory *memory, memoryAddress& programCounter) {
 	instruction *instruct = memory -> readFromMemory(programCounter++);
 	if_id if_id_return = {instruct};
 	return if_id_return;
 }
 
+/* Instruction Decode */
 id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory) {
 	id_ex id_ex_result;
 	if(if_id_instructionInput != 0) { // NOP
@@ -301,6 +302,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 	return id_ex_result;
 }
 
+/* Instruction Execute */
 ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 	ex_mem ex_mem_result = ex_mem_input;
 	// run the instruction
@@ -486,8 +488,9 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 	return ex_mem_result;
 }
 
+/* Memory Access */
 mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
-	mem_wb mem_wb_result = mem_wb_old;
+	mem_wb mem_wb_result = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	// store or load from Memory
 	mem_wb_result.operationCode = ex_mem_input.operationCode;
 	mem_wb_result.instruct = ex_mem_input.instruct;
@@ -632,6 +635,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 	return mem_wb_result;
 }
 
+/* Write Back */
 void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 	switch(mem_wb_input.operationCode) {
 		// NOP
@@ -738,12 +742,10 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 		}
 		// LOAD
 		case 11: { 
-			cout << "Load not implemented." << endl;
 			break;
 		}
 		// STORE
 		case 12: { 
-			cout << "Store not implemented." << endl;
 			break;
 		}
 		default: {
