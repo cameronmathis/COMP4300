@@ -154,7 +154,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			id_ex_result.registerThree = 0;
 			id_ex_result.valueA = 0;
 			id_ex_result.valueB = 0;
-			break;
+			return id_ex_result;
 		}
 		// ADDI
 		case 1: { 
@@ -162,7 +162,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.valueA = registers -> readFromRegister(centerBits());
-			break;
+			return id_ex_result;
 		}
 		// B
 		case 2: { 
@@ -170,7 +170,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			labelOffset = getSignedImmediate(rightBits());
 			programCounter--;
 			programCounter += labelOffset;
-			break;
+			return id_ex_result;
 		}
 		// BEQZ
 		case 3: { 
@@ -181,7 +181,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 				programCounter--;
 				programCounter += labelOffset;
 			}
-			break;
+			return id_ex_result;
 		}
 		// BGE
 		case 4: { 
@@ -208,7 +208,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 				programCounter--;
 				programCounter += labelOffset;
 			}
-			break;
+			return id_ex_result;
 		}
 		// BNE
 		case 5: { 
@@ -223,13 +223,13 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 				programCounter--;
 				programCounter += labelOffset;
 			}
-			break;
+			return id_ex_result;
 		}
 		// LA
 		case 6: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.valueA = immediateValue();
-			break;
+			return id_ex_result;
 		}
 		// LB
 		case 7: { 
@@ -237,14 +237,14 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			id_ex_result.registerTwo = centerBits();
 		 	id_ex_result.immediate = getSignedImmediate(rightBits());
 			id_ex_result.valueA = registers -> readFromRegister(centerBits());
-			break;
+			return id_ex_result;
 		}
 		// LI
 		case 8: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.valueA = centerBits();
-			break;
+			return id_ex_result;
 		}
 		// SUBI
 		case 9: { 
@@ -252,7 +252,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			id_ex_result.valueA = registers -> readFromRegister(centerBits());
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.registerOne = leftBits();
-			break;
+			return id_ex_result;
 		}
 		// SYSCALL
 		case 10: { 
@@ -284,22 +284,21 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 					break;
 				}
 			}
-			break;
+			return id_ex_result;
 		}
 		// LOAD
 		case 11: { 
-			break;
+			return id_ex_result;
 		}
 		// STORE
 		case 12: { 
-			break;
+			return id_ex_result;
 		}
 		default: {
 			cout << "There was an error with the instruction decoding stage." << endl;
-			break;
+			return id_ex_result;
 		}
 	}
-	return id_ex_result;
 }
 
 /* Instruction Execute */
@@ -318,7 +317,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.valueA = 0;
 			ex_mem_result.valueB = 0;
 			ex_mem_result.aluOutput = 0;
-			break;
+			return ex_mem_result;
 		}
 		// ADDI
 		case 1: { 
@@ -333,23 +332,23 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 				id_ex_input.valueA = mem_wb_old.aluOutput;
 			}
 			ex_mem_result.aluOutput = id_ex_input.immediate + id_ex_input.valueA;
-			break;
+			return ex_mem_result;
 		}
 		// B
 		case 2: { 
-			break;
+			return ex_mem_result;
 		}
 		// BEQZ
 		case 3: { 
-			break;
+			return ex_mem_result;
 		}
 		// BGE
 		case 4: { 
-			break;
+			return ex_mem_result;
 		}
 		// BNE
 		case 5: { 
-			break;
+			return ex_mem_result;
 		}
 		// LA
 		case 6: { 
@@ -362,7 +361,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 				id_ex_input.valueA = mem_wb_old.aluOutput;
 			}
 			ex_mem_result.aluOutput = id_ex_input.valueA;
-			break;
+			return ex_mem_result;
 		}
 		// LB
 		case 7: { 
@@ -377,7 +376,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 				id_ex_input.valueA = mem_wb_old.aluOutput;
 			}
 			ex_mem_result.aluOutput = id_ex_input.valueA + id_ex_input.immediate;
-			break;
+			return ex_mem_result;
 		}
 		// LI
 		case 8: { 
@@ -391,7 +390,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 				id_ex_input.valueA = mem_wb_old.aluOutput;
 			}
 			ex_mem_result.aluOutput = id_ex_input.valueA;
-			break;
+			return ex_mem_result;
 		}
 		// SUBI
 		case 9: { 
@@ -406,7 +405,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 				id_ex_input.valueA = mem_wb_old.aluOutput;
 			}
 			ex_mem_result.aluOutput =  id_ex_input.valueA - id_ex_input.immediate;
-			break;
+			return ex_mem_result;
 		}
 		// SYSCALL
 		case 10: { 
@@ -469,29 +468,28 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 					break;
 				}
 			}
-			break;
+			return ex_mem_result;
 		}
 		// LOAD
 		case 11: { 
-			break;
+			return ex_mem_result;
 		}
 		// STORE
 		case 12: { 
-			break;
+			return ex_mem_result;
 		}
 		default: {
 			cout << "There was an error with the execute stage." << endl;
 			isUserMode = false;
-			break;
+			return ex_mem_result;
 		}
 	}
-	return ex_mem_result;
 }
 
 /* Memory Access */
 mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 	mem_wb mem_wb_result = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	// store or load from Memory
+	// store or load from memory
 	mem_wb_result.operationCode = ex_mem_input.operationCode;
 	mem_wb_result.instruct = ex_mem_input.instruct;
 	switch(ex_mem_input.operationCode) {
@@ -505,7 +503,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			mem_wb_result.valueB = 0;
 			mem_wb_result.aluOutput = 0;
 			mem_wb_result.memoryReadOutput = 0;
-			break;
+			return mem_wb_result;
 		}
 		// ADDI
 		case 1: { 
@@ -514,30 +512,30 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
-			break;
+			return mem_wb_result;
 		}
 		// B
 		case 2: { 
-			break;
+			return mem_wb_result;
 		}
 		// BEQZ
 		case 3: { 
-			break;
+			return mem_wb_result;
 		}
 		// BGE
 		case 4: { 
-			break;
+			return mem_wb_result;
 		}
 		// BNE
 		case 5: {
-			break;
+			return mem_wb_result;
 		}
 		// LA
 		case 6: { 
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.aluOutput = ex_mem_input.valueA;
-			break;
+			return mem_wb_result;
 		}
 		// LB
 		case 7: { 
@@ -547,7 +545,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
 			mem_wb_result.memoryReadOutput = memory -> readByte(ex_mem_input.aluOutput, ex_mem_input.aluOutput % 4);
-			break;
+			return mem_wb_result;
 		}
 		// LI
 		case 8: { 
@@ -555,7 +553,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
-			break;
+			return mem_wb_result;
 		}
 		// SUBI
 		case 9: { 
@@ -564,7 +562,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
-			break;
+			return mem_wb_result;
 		}
 		// SYSCALL
 		case 10: { 
@@ -616,23 +614,22 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 					break;
 				}
 			}
-			break;
+			return mem_wb_result;
 		}
 		// LOAD
 		case 11: { 
-			break;
+			return mem_wb_result;
 		}
 		// STORE
 		case 12: { 
-			break;
+			return mem_wb_result;
 		}
 		default: {
 			cout << "There was an error with the memory access stage." << endl;
 			isUserMode = false;
-			break;
+			return mem_wb_result;
 		}
 	}
-	return mem_wb_result;
 }
 
 /* Write Back */
