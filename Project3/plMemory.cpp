@@ -289,7 +289,7 @@ int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 				bool isEndFound = false;
 				memoryAddress currentByte = 0;
 				while(!isEndFound && length < maxLength) {
-					currentByte = getMemoryByte(stackSegment[dataIndex], 1 + (length%4));
+					currentByte = getMemoryByte(stackSegment[dataIndex], 1 + (length % 4));
 					if(0 == currentByte) {
 						isEndFound = true;
 					}

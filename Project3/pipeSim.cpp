@@ -137,7 +137,7 @@ if_id Sim::instructionFetch(Memory *memory, memoryAddress& programCounter) {
 /* Instruction Decode */
 id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress& programCounter, RegisterBank *registers, Memory *memory) {
 	id_ex id_ex_result;
-	if(if_id_instructionInput != 0) { // NOP
+	if(if_id_instructionInput != 0) { // check if NOP
 		currentInstruction = if_id_instructionInput;
 		id_ex_result.operationCode = getCurrentOperationCode();
 		id_ex_result.instruct = *currentInstruction;
@@ -156,8 +156,16 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			id_ex_result.valueB = 0;
 			return id_ex_result;
 		}
-		// ADDI
+		// ADD
 		case 1: { 
+			id_ex_result.registerThree = rightBits();
+			id_ex_result.registerTwo = centerBits();
+			id_ex_result.registerOne = leftBits();
+			id_ex_result.valueA = registers -> readFromRegister(centerBits());
+			return id_ex_result;
+		}
+		// ADDI
+		case 2: { 
 			id_ex_result.immediate = getSignedImmediate(rightBits());
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.registerOne = leftBits();
@@ -165,7 +173,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			return id_ex_result;
 		}
 		// B
-		case 2: { 
+		case 3: { 
 			int8_t labelOffset = 0;
 			labelOffset = getSignedImmediate(rightBits());
 			programCounter--;
@@ -173,7 +181,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			return id_ex_result;
 		}
 		// BEQZ
-		case 3: { 
+		case 4: { 
 			int8_t labelOffset = 0;
 			instruction firstRegisterValue = registers -> readFromRegister(leftBits());
 			if (firstRegisterValue == 0) {
@@ -184,7 +192,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			return id_ex_result;
 		}
 		// BGE
-		case 4: { 
+		case 5: { 
 			instruction firstRegisterValue = registers -> readFromRegister(leftBits());
 			instruction secondRegisterValue = registers -> readFromRegister(centerBits());
 			if (leftBits() == ex_mem_old.registerOne) {
@@ -211,7 +219,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			return id_ex_result;
 		}
 		// BNE
-		case 5: { 
+		case 6: { 
 			instruction firstRegisterValue = registers -> readFromRegister(leftBits());
 			instruction secondRegisterValue = registers -> readFromRegister(centerBits());
 			if (centerBits() == ex_mem_new.registerOne) {
@@ -226,13 +234,13 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			return id_ex_result;
 		}
 		// LA
-		case 6: { 
+		case 7: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.valueA = immediateValue();
 			return id_ex_result;
 		}
 		// LB
-		case 7: { 
+		case 8: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.registerTwo = centerBits();
 		 	id_ex_result.immediate = getSignedImmediate(rightBits());
@@ -240,14 +248,14 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			return id_ex_result;
 		}
 		// LI
-		case 8: { 
+		case 9: { 
 			id_ex_result.registerOne = leftBits();
 			id_ex_result.registerTwo = centerBits();
 			id_ex_result.valueA = centerBits();
 			return id_ex_result;
 		}
 		// SUBI
-		case 9: { 
+		case 10: { 
 			id_ex_result.immediate = getSignedImmediate(rightBits());
 			id_ex_result.valueA = registers -> readFromRegister(centerBits());
 			id_ex_result.registerTwo = centerBits();
@@ -255,7 +263,7 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			return id_ex_result;
 		}
 		// SYSCALL
-		case 10: { 
+		case 11: { 
 			id_ex_result.registerTwo = 3;
 			id_ex_result.valueB = registers -> readFromRegister(3);
 			switch(id_ex_result.valueB) {
@@ -286,14 +294,6 @@ id_ex Sim::instructionDecode(instruction *if_id_instructionInput, memoryAddress&
 			}
 			return id_ex_result;
 		}
-		// LOAD
-		case 11: { 
-			return id_ex_result;
-		}
-		// STORE
-		case 12: { 
-			return id_ex_result;
-		}
 		default: {
 			cout << "There was an error with the instruction decoding stage." << endl;
 			return id_ex_result;
@@ -319,8 +319,23 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			ex_mem_result.aluOutput = 0;
 			return ex_mem_result;
 		}
-		// ADDI
+		// ADD
 		case 1: { 
+			ex_mem_result.registerThree = id_ex_input.registerThree;
+			ex_mem_result.registerTwo = id_ex_input.registerTwo;
+			ex_mem_result.registerOne = id_ex_input.registerOne;
+			ex_mem_result.valueA = id_ex_input.valueA;
+			if (id_ex_input.registerTwo == ex_mem_input.registerOne) {
+				id_ex_input.valueA = ex_mem_input.aluOutput;
+			}
+			if (id_ex_input.registerTwo == mem_wb_old.registerOne) {
+				id_ex_input.valueA = mem_wb_old.aluOutput;
+			}
+			ex_mem_result.aluOutput = id_ex_input.immediate + id_ex_input.valueA;
+			return ex_mem_result;
+		}
+		// ADDI
+		case 2: { 
 			ex_mem_result.immediate = id_ex_input.immediate;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
 			ex_mem_result.registerOne = id_ex_input.registerOne;
@@ -335,23 +350,23 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			return ex_mem_result;
 		}
 		// B
-		case 2: { 
-			return ex_mem_result;
-		}
-		// BEQZ
 		case 3: { 
 			return ex_mem_result;
 		}
-		// BGE
+		// BEQZ
 		case 4: { 
 			return ex_mem_result;
 		}
-		// BNE
+		// BGE
 		case 5: { 
 			return ex_mem_result;
 		}
-		// LA
+		// BNE
 		case 6: { 
+			return ex_mem_result;
+		}
+		// LA
+		case 7: { 
 			ex_mem_result.registerOne = id_ex_input.registerOne;
 			ex_mem_result.valueA = id_ex_input.valueA;
 			if (id_ex_input.registerTwo == ex_mem_input.registerOne) {
@@ -364,7 +379,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			return ex_mem_result;
 		}
 		// LB
-		case 7: { 
+		case 8: { 
 			ex_mem_result.registerOne = id_ex_input.registerOne;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
 			ex_mem_result.immediate = id_ex_input.immediate;
@@ -379,7 +394,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			return ex_mem_result;
 		}
 		// LI
-		case 8: { 
+		case 9: { 
 			ex_mem_result.registerOne = id_ex_input.registerOne;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
 			ex_mem_result.valueA = id_ex_input.valueA;
@@ -393,7 +408,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			return ex_mem_result;
 		}
 		// SUBI
-		case 9: { 
+		case 10: { 
 			ex_mem_result.immediate = id_ex_input.immediate;
 			ex_mem_result.valueA = id_ex_input.valueA;
 			ex_mem_result.registerTwo = id_ex_input.registerTwo;
@@ -408,7 +423,7 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			return ex_mem_result;
 		}
 		// SYSCALL
-		case 10: { 
+		case 11: { 
 			instruction registerValue = id_ex_input.valueB;
 			if (id_ex_input.registerTwo == ex_mem_input.registerOne) {
 				registerValue = ex_mem_input.aluOutput;
@@ -470,14 +485,6 @@ ex_mem Sim::execute(id_ex id_ex_input, ex_mem ex_mem_input) {
 			}
 			return ex_mem_result;
 		}
-		// LOAD
-		case 11: { 
-			return ex_mem_result;
-		}
-		// STORE
-		case 12: { 
-			return ex_mem_result;
-		}
 		default: {
 			cout << "There was an error with the execute stage." << endl;
 			isUserMode = false;
@@ -505,8 +512,17 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			mem_wb_result.memoryReadOutput = 0;
 			return mem_wb_result;
 		}
-		// ADDI
+		// ADD
 		case 1: { 
+			mem_wb_result.registerThree = ex_mem_input.registerThree;
+			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
+			mem_wb_result.registerOne = ex_mem_input.registerOne;
+			mem_wb_result.valueA = ex_mem_input.valueA;
+			mem_wb_result.aluOutput = ex_mem_input.aluOutput;
+			return mem_wb_result;
+		}
+		// ADDI
+		case 2: { 
 			mem_wb_result.immediate = ex_mem_input.immediate;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
@@ -515,30 +531,30 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			return mem_wb_result;
 		}
 		// B
-		case 2: { 
-			return mem_wb_result;
-		}
-		// BEQZ
 		case 3: { 
 			return mem_wb_result;
 		}
-		// BGE
+		// BEQZ
 		case 4: { 
 			return mem_wb_result;
 		}
+		// BGE
+		case 5: { 
+			return mem_wb_result;
+		}
 		// BNE
-		case 5: {
+		case 6: {
 			return mem_wb_result;
 		}
 		// LA
-		case 6: { 
+		case 7: { 
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.aluOutput = ex_mem_input.valueA;
 			return mem_wb_result;
 		}
 		// LB
-		case 7: { 
+		case 8: { 
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.immediate = ex_mem_input.immediate;
@@ -548,7 +564,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			return mem_wb_result;
 		}
 		// LI
-		case 8: { 
+		case 9: { 
 			mem_wb_result.registerOne = ex_mem_input.registerOne;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.valueA = ex_mem_input.valueA;
@@ -556,7 +572,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			return mem_wb_result;
 		}
 		// SUBI
-		case 9: { 
+		case 10: { 
 			mem_wb_result.immediate = ex_mem_input.immediate;
 			mem_wb_result.valueA = ex_mem_input.valueA;
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
@@ -565,7 +581,7 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			return mem_wb_result;
 		}
 		// SYSCALL
-		case 10: { 
+		case 11: { 
 			mem_wb_result.registerTwo = ex_mem_input.registerTwo;
 			mem_wb_result.valueB = ex_mem_input.valueB;
 			switch(ex_mem_input.valueB) {
@@ -616,14 +632,6 @@ mem_wb Sim::memoryAccess(ex_mem ex_mem_input, Memory *memory) {
 			}
 			return mem_wb_result;
 		}
-		// LOAD
-		case 11: { 
-			return mem_wb_result;
-		}
-		// STORE
-		case 12: { 
-			return mem_wb_result;
-		}
 		default: {
 			cout << "There was an error with the memory access stage." << endl;
 			isUserMode = false;
@@ -640,7 +648,7 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 			numberOfNoOperations++;
 			break;
 		}
-		// ADDI
+		// ADD
 		case 1: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.aluOutput);
 			if (!success) {
@@ -649,28 +657,37 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 			instructionsExecuted++;
 			break;
 		}
-		// B
+		// ADDI
 		case 2: { 
+			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.aluOutput);
+			if (!success) {
+				cout << "Error adding value to register: " << std::dec << mem_wb_input.registerOne << endl;
+			}
 			instructionsExecuted++;
 			break;
 		}
-		// BEQZ
+		// B
 		case 3: { 
 			instructionsExecuted++;
 			break;
 		}
-		// BGE
+		// BEQZ
 		case 4: { 
 			instructionsExecuted++;
 			break;
 		}
-		// BNE
+		// BGE
 		case 5: { 
 			instructionsExecuted++;
 			break;
 		}
-		// LA
+		// BNE
 		case 6: { 
+			instructionsExecuted++;
+			break;
+		}
+		// LA
+		case 7: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.valueA);
 			if (!success) {
 				cout << "Error loading address to register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -679,7 +696,7 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 			break;
 		}
 		// LB
-		case 7: { 
+		case 8: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.memoryReadOutput );
 			if (!success) {
 				cout << "Error loading byte into register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -688,7 +705,7 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 			break;
 		}
 		// LI
-		case 8: { 
+		case 9: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.registerTwo);
 			if (!success) {
 				cout << "Error loading immediate value to register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -697,7 +714,7 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 			break;
 		}
 		// SUBI
-		case 9: { 
+		case 10: { 
 			bool success = registers -> writeToRegister(mem_wb_input.registerOne, mem_wb_input.aluOutput);
 			if (!success) {
 				cout << "Error subtracting value from register: " << std::dec << mem_wb_input.registerOne << endl;
@@ -706,7 +723,7 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 			break;
 		}
 		// SYSCALL
-		case 10: { 
+		case 11: { 
 			switch(mem_wb_input.valueB) {
 				case 1: {
 					instructionsExecuted++;
@@ -735,14 +752,6 @@ void Sim::writeBack(mem_wb mem_wb_input, RegisterBank *registers) {
 					break;
 				}
 			}
-			break;
-		}
-		// LOAD
-		case 11: { 
-			break;
-		}
-		// STORE
-		case 12: { 
 			break;
 		}
 		default: {
