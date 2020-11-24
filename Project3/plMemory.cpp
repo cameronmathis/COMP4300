@@ -52,6 +52,7 @@ class Memory {
 
 /* Initialize memory -- modified from project 1 & alsmost exactly the same as project 2 */
 Memory::Memory() {
+	string partiallyAssembledCodeFile = "lab3c.s"; // this is the file containing the partially assembled code
 	textNextOpenMemoryLocation = -1;
 	int hexidecimalOne;
 	int hexidecimalTwo;
@@ -60,7 +61,7 @@ Memory::Memory() {
 	char dataArray[DATA_LENGTH];
 	memset(dataArray, '\0', sizeof(dataArray) / sizeof(dataArray[0]));
 	int i = 0;
-	ifstream gprFileCode("lab3c.s");
+	ifstream gprFileCode(partiallyAssembledCodeFile);
 	if (gprFileCode.is_open()) {
 		while (getline(gprFileCode, lineOne)) {
 			lineOne.erase(lineOne.find_last_not_of("\n\r") + 1); // this is the only line different from project 2
@@ -270,7 +271,7 @@ int Memory::getLengthOfString(memoryAddress memoryAddressIndex, int maxLength) {
 				bool isEndFound = false;
 				memoryAddress currentByte = 0;
 				while(!isEndFound && length < maxLength) {
-					currentByte = getMemoryByte(dataSegment[dataIndex], 1 + (length%4));
+					currentByte = getMemoryByte(dataSegment[dataIndex], 1 + (length % 4));
 					if(0 == currentByte) {
 						isEndFound = true;
 					}

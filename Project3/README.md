@@ -20,19 +20,13 @@ In order to run the pipeline machine, run the command:
 
 	$ ./pipeline.sh run
 
-You should see this:
-
->Please enter a word:
-
-Type any word and hit enter.
-
 Once you are done simulating the pipeline machine run:
 	
 	$ ./pipeline.sh clean
 
 This will clean up the project folder.
 
-The project is currently set for lab3c.s, but if you would like to run a different partially assembled code (lab3a.s or lab3b.s) then you can change the filename on line 64 of the plMemory.cpp file.
+The project is currently set for lab3c.s, but if you would like to run a different partially assembled code (lab3a.s or lab3b.s) then you can change the partiallyAssembledCodeFile string variable on line 55 of the plMemory.cpp file.
 
 Results:
 -------------
@@ -49,11 +43,13 @@ lab3b:
 > Cycles Spent in Execution (C): 124 <br/>
 > No Operations (NOPs): 60 <br/>
 
-> Please enter a word: nascar
-> "The string is not a palindrome."
-> Instructions Executed (IC): 43
-> Cycles Spent in Execution (C): 86
-> No Operations (NOPs): 44
+<br/>
+
+> Please enter a word: nascar <br/> 
+> "The string is not a palindrome." <br/>
+> Instructions Executed (IC): 43 <br/>
+> Cycles Spent in Execution (C): 86 <br/>
+> No Operations (NOPs): 44 <br/>
 
 lab3c:
 > Instructions Executed (IC): 12 <br/>
@@ -85,7 +81,5 @@ The implementation of this project was not as hard as I first expected it to be 
 
 Issues: <br/>
 Firstly, I ran into the same issue I had in Project 1 when reading from a file, even thought I copied my memory file exactly from Project 2 (where it worked). I eventually figured it out.
-
-Secondly, I quickly learned that it would be extremely hard to implement and test only one part of the pipeline. As a result I had to have some code for each stage written before I could run my simulation.
 
 Secondly, when I tried to use the exact layout that Dr. Xiao suggested, I struggled to pass all the variables I need for certain function. As a result, some variables were made global.
